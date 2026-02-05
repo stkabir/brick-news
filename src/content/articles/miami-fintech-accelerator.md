@@ -1,0 +1,13 @@
+---
+titleEn: Miami Fintech Accelerator Selects Brickell Startups
+titleEs: Aceleradora Fintech de Miami Selecciona Startups de Brickell
+summaryEn: Eight early-stage founders land seed capital and bilingual mentorship this spring.
+summaryEs: Ocho fundadores en etapa temprana obtienen capital semilla y mentoría bilingüe esta primavera.
+image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1600&q=80"
+category: business
+author: Daniel Ruiz
+date: "2026-01-26"
+featured: false
+priority: 7
+---
+The cohort highlights payments, climate fintech, and Latin American remittance tools with demo days planned in English and Spanish.

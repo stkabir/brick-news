@@ -1,0 +1,185 @@
+---
+import "../styles/global.css";
+
+interface NavLink {
+  slug: string;
+  titleEn: string;
+  titleEs: string;
+}
+
+interface Props {
+  navLinks: NavLink[];
+  pageTitle?: string;
+  descriptionEn?: string;
+  descriptionEs?: string;
+}
+
+const {
+  navLinks,
+  pageTitle = "Brickell News",
+  descriptionEn = "Your local source for Brickell news.",
+  descriptionEs = "Tu fuente local de noticias de Brickell.",
+} = Astro.props;
+---
+<html lang="en" data-locale="en" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={descriptionEn} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-[#f3fbfb] text-slate-900">
+    <header class="shadow-[0_12px_32px_rgba(9,86,92,0.12)]">
+      <div class="bg-[#1a9d9d] text-white">
+        <div class="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] md:flex-row md:items-center md:justify-between">
+          <span>
+            <span class="lang lang-en">Your local source for Brickell news</span>
+            <span class="lang lang-es">Tu fuente local de noticias de Brickell</span>
+          </span>
+          <button
+            type="button"
+            data-lang-toggle
+            class="self-start rounded-full bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.24em] transition hover:bg-white/20 md:self-auto"
+          >
+            <span class="lang lang-en">Switch to Español</span>
+            <span class="lang lang-es">Cambiar a English</span>
+          </button>
+        </div>
+      </div>
+      <div class="bg-[#48d1d1]">
+        <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-white/80">
+              <span class="lang lang-en">Brickell</span>
+              <span class="lang lang-es">Brickell</span>
+            </p>
+            <h1 class="text-4xl font-extrabold text-white drop-shadow-sm md:text-5xl">
+              <span class="lang lang-en">Brickell News</span>
+              <span class="lang lang-es">Noticias Brickell</span>
+            </h1>
+            <p class="mt-2 max-w-xl text-sm text-white/90">
+              <span class="lang lang-en">{descriptionEn}</span>
+              <span class="lang lang-es">{descriptionEs}</span>
+            </p>
+          </div>
+          <form action="#" class="relative w-full max-w-xs">
+            <label class="sr-only" for="search">
+              <span class="lang lang-en">Search news</span>
+              <span class="lang lang-es">Buscar noticias</span>
+            </label>
+            <input
+              id="search"
+              name="search"
+              type="search"
+              placeholder="Search Brickell"
+              class="w-full rounded-full border border-white/40 bg-white/90 px-5 py-3 pr-12 font-medium text-slate-700 placeholder:text-slate-400 focus:border-white focus:outline-none focus:ring-2 focus:ring-white/50"
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#0a5f66]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+              />
+            </svg>
+          </form>
+        </div>
+      </div>
+      <nav class="bg-white/90">
+        <div class="mx-auto flex max-w-6xl items-center gap-4 overflow-x-auto px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-[#0a5f66]">
+          <a href="#top" class="rounded-full px-3 py-1 transition hover:bg-[#48d1d1]/10">
+            <span class="lang lang-en">Home</span>
+            <span class="lang lang-es">Inicio</span>
+          </a>
+          {navLinks.map((link) => (
+            <a
+              href={`#${link.slug}`}
+              class="whitespace-nowrap rounded-full px-3 py-1 transition hover:bg-[#48d1d1]/10"
+            >
+              <span class="lang lang-en">{link.titleEn}</span>
+              <span class="lang lang-es">{link.titleEs}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+    </header>
+    <main id="top" class="mx-auto flex max-w-6xl flex-col gap-12 px-6 py-12">
+      <slot />
+    </main>
+    <footer class="bg-[#0a5f66] py-12 text-white">
+      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-2xl font-bold">
+            <span class="lang lang-en">Stay connected to Brickell</span>
+            <span class="lang lang-es">Mantente conectado con Brickell</span>
+          </h2>
+          <p class="mt-2 max-w-md text-sm text-white/80">
+            <span class="lang lang-en">Weekly highlights delivered in English and Spanish.</span>
+            <span class="lang lang-es">Destacados semanales entregados en inglés y español.</span>
+          </p>
+        </div>
+        <form class="flex w-full max-w-md flex-col gap-3 md:flex-row">
+          <label class="sr-only" for="newsletter-email">
+            <span class="lang lang-en">Email address</span>
+            <span class="lang lang-es">Correo electrónico</span>
+          </label>
+          <input
+            id="newsletter-email"
+            type="email"
+            placeholder="hello@brickell.news"
+            class="w-full rounded-full border border-white/30 bg-white px-5 py-3 text-slate-900 placeholder:text-slate-500 focus:border-white/70 focus:outline-none focus:ring-2 focus:ring-white/50"
+          />
+          <button
+            type="submit"
+            class="rounded-full bg-[#48d1d1] px-6 py-3 text-sm font-bold uppercase tracking-[0.2em] text-[#0a5f66] transition hover:bg-white"
+          >
+            <span class="lang lang-en">Subscribe</span>
+            <span class="lang lang-es">Suscribirse</span>
+          </button>
+        </form>
+      </div>
+      <div class="mt-8 text-center text-xs uppercase tracking-[0.3em] text-white/60">
+        <span class="lang lang-en">© {new Date().getFullYear()} Brickell News</span>
+        <span class="lang lang-es">© {new Date().getFullYear()} Noticias Brickell</span>
+      </div>
+    </footer>
+    <script is:inline>
+      const storageKey = "brickell-news-locale";
+      const root = document.documentElement;
+      const toggleButton = document.querySelector('[data-lang-toggle]');
+
+      const setLocale = (locale) => {
+        if (!['en', 'es'].includes(locale)) locale = 'en';
+        root.dataset.locale = locale;
+        root.lang = locale;
+        toggleButton?.setAttribute('aria-label', locale === 'en' ? 'Switch to Spanish' : 'Cambiar a inglés');
+      };
+
+      const saved = typeof window !== 'undefined' ? localStorage.getItem(storageKey) : null;
+      if (saved) {
+        setLocale(saved);
+      }
+
+      toggleButton?.addEventListener('click', () => {
+        const next = root.dataset.locale === 'en' ? 'es' : 'en';
+        setLocale(next);
+        localStorage.setItem(storageKey, next);
+      });
+    </script>
+  </body>
+</html>

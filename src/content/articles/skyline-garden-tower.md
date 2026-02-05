@@ -1,0 +1,13 @@
+---
+titleEn: Skyline Garden Tower Tops Out
+titleEs: La Torre Skyline Garden Alcanza su Altura Máxima
+summaryEn: The 62-story residential project unveils rooftop amenities centered on urban agriculture.
+summaryEs: El proyecto residencial de 62 pisos presenta amenidades en la azotea enfocadas en agricultura urbana.
+image: "https://images.unsplash.com/photo-1505843513577-22bb7d21e455?auto=format&fit=crop&w=1600&q=80"
+category: real-estate
+author: Marcus Lee
+date: "2026-01-28"
+featured: true
+priority: 9
+---
+Developers of Skyline Garden Tower celebrated its topping out with a preview of the hydroponic terraces and chef-led culinary studio. Future residents will reserve planting beds via an app and join bilingual harvest workshops overlooking Biscayne Bay.

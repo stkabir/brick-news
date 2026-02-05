@@ -1,0 +1,13 @@
+---
+titleEn: Brickell Tech Job Fair Adds AI Pavilion
+titleEs: La Feria de Empleo Tech de Brickell Añade Pabellón de IA
+summaryEn: Regional employers court bilingual talent with on-site interviews and portfolio reviews.
+summaryEs: Empleadores regionales buscan talento bilingüe con entrevistas en el lugar y revisión de portafolios.
+image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1600&q=80"
+category: events
+author: Natalie Chen
+date: "2026-01-27"
+featured: false
+priority: 5
+---
+Workshops tackle AI ethics and startup hiring in both English and Spanish.
