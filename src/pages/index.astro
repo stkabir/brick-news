@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import "@splidejs/splide/css";
 
 type CategoryEntry = CollectionEntry<"categories">;
 type SectionEntry = CollectionEntry<"sections">;
@@ -128,15 +129,18 @@ const heroDateLabels = heroArticle?.formattedDate;
   {heroSection && heroSection.articles.length > 0 ? (
     <section
       id={heroSection.slug}
-      class="grid gap-6 rounded-3xl bg-white/80 p-6 shadow-[0_18px_42px_rgba(10,95,102,0.14)] backdrop-blur"
+      class="grid gap-6 rounded-3xl bg-white/80 p-6 h-[448px]
+      shadow-[0_18px_42px_rgba(10,95,102,0.14)] backdrop-blur"
     >
-      <div class="flex flex-col gap-8 lg:flex-row">
+      <div class="flex flex-col gap-8 lg:flex-row h-[400px]">
         <div class="relative flex-1 overflow-hidden rounded-3xl bg-slate-900/10">
-          <img
-            src={heroEntry?.data.image}
-            alt={heroEntry?.data.titleEn}
+          <video
+            src="/img/vid-brickell.mp4"
             class="h-full w-full object-cover"
-            loading="lazy"
+            autoplay
+            loop
+            muted
+            playsinline
           />
           <div class="absolute inset-0 bg-linear-to-br from-[#0a5f66]/90 via-[#0a5f66]/40 to-transparent" />
           <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
@@ -174,121 +178,83 @@ const heroDateLabels = heroArticle?.formattedDate;
             </button>
           </div>
         </div>
-        <div class="flex flex-1 flex-col gap-6">
-          <div>
-            <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-              <span class="lang lang-en">{heroSection.titleEn}</span>
-              <span class="lang lang-es">{heroSection.titleEs}</span>
-            </h2>
-            {(heroSection.descriptionEn || heroSection.descriptionEs) && (
-              <p class="mt-2 text-sm text-slate-600">
-                <span class="lang lang-en">{heroSection.descriptionEn}</span>
-                <span class="lang lang-es">{heroSection.descriptionEs}</span>
-              </p>
-            )}
-          </div>
-          <div class="grid gap-4">
-            {heroSection.articles.slice(1, 4).map(({ entry, categoryMeta, formattedDate }) => (
-              <article class="flex items-start gap-4 rounded-2xl bg-[#48d1d1]/5 p-4 transition hover:bg-[#48d1d1]/10">
-                <img
-                  src={entry.data.image}
-                  alt={entry.data.titleEn}
-                  class="h-20 w-20 rounded-xl object-cover"
-                  loading="lazy"
-                />
-                <div class="flex-1">
-                  <p class="text-xs font-semibold uppercase tracking-[0.28em] text-[#0a5f66]">
-                    <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                    <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                  </p>
-                  <h3 class="mt-2 text-lg font-bold">
-                    <span class="lang lang-en">{entry.data.titleEn}</span>
-                    <span class="lang lang-es">{entry.data.titleEs}</span>
-                  </h3>
-                  <p class="mt-1 text-sm text-slate-600">
-                    <span class="lang lang-en">{entry.data.summaryEn}</span>
-                    <span class="lang lang-es">{entry.data.summaryEs}</span>
-                  </p>
-                  <div class="mt-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                    <span class="lang lang-en">{formattedDate.en}</span>
-                    <span class="lang lang-es">{formattedDate.es}</span>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   ) : null}
 
-  <section class="grid gap-8 lg:grid-cols-[2fr_1fr]">
-    <div class="space-y-8">
-      {nonHeroSections
-        .filter((section) => section.layout === "grid")
-        .map((section) => (
-          <section
-            id={section.slug}
-            class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-          >
-            <header class="mb-6 flex items-center justify-between gap-4">
-              <div>
-                <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-                  <span class="lang lang-en">{section.titleEn}</span>
-                  <span class="lang lang-es">{section.titleEs}</span>
-                </h2>
-                {(section.descriptionEn || section.descriptionEs) && (
-                  <p class="mt-2 text-sm text-slate-600">
-                    <span class="lang lang-en">{section.descriptionEn}</span>
-                    <span class="lang lang-es">{section.descriptionEs}</span>
-                  </p>
-                )}
-              </div>
-              <div class="hidden gap-2 md:flex">
-                {section.articles.slice(0, 4).map(({ categoryMeta }) => (
-                  <span
-                    class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]"
-                    style={{ backgroundColor: `${categoryMeta.accentColor}1A` }}
-                  >
-                    <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                    <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                  </span>
-                ))}
-              </div>
-            </header>
-            <div class="grid gap-6 sm:grid-cols-2">
-              {section.articles.slice(0, 4).map(({ entry, categoryMeta, formattedDate }) => (
-                <article class="group flex flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/70 transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(10,95,102,0.16)]">
-                  <div class="relative h-44 overflow-hidden">
-                    <img src={entry.data.image} alt={entry.data.titleEn} class="h-full w-full object-cover" loading="lazy" />
-                    <span class="absolute left-4 top-4 rounded-full bg-[#0a5f66]/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white">
-                      <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                      <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                    </span>
-                  </div>
-                  <div class="flex flex-1 flex-col gap-3 p-5">
-                    <h3 class="text-xl font-bold text-[#0a5f66]">
-                      <span class="lang lang-en">{entry.data.titleEn}</span>
-                      <span class="lang lang-es">{entry.data.titleEs}</span>
-                    </h3>
-                    <p class="text-sm text-slate-600 flex-1">
-                      <span class="lang lang-en">{entry.data.summaryEn}</span>
-                      <span class="lang lang-es">{entry.data.summaryEs}</span>
-                    </p>
-                    <div class="flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
-                      <span>{entry.data.author}</span>
-                      <span>
-                        <span class="lang lang-en">{formattedDate.en}</span>
-                        <span class="lang lang-es">{formattedDate.es}</span>
+  {nonHeroSections
+    .filter((section) => section.layout === "grid")
+    .map((section) => (
+      <section
+        id={section.slug}
+        class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
+      >
+        <header class="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
+              <span class="lang lang-en">{section.titleEn}</span>
+              <span class="lang lang-es">{section.titleEs}</span>
+            </h2>
+            {(section.descriptionEn || section.descriptionEs) && (
+              <p class="mt-2 text-sm text-slate-600">
+                <span class="lang lang-en">{section.descriptionEn}</span>
+                <span class="lang lang-es">{section.descriptionEs}</span>
+              </p>
+            )}
+          </div>
+          <div class="hidden gap-2 md:flex">
+            {section.articles.slice(0, 4).map(({ categoryMeta }) => (
+              <span
+                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]"
+                style={{ backgroundColor: `${categoryMeta.accentColor}1A` }}
+              >
+                <span class="lang lang-en">{categoryMeta.titleEn}</span>
+                <span class="lang lang-es">{categoryMeta.titleEs}</span>
+              </span>
+            ))}
+          </div>
+        </header>
+        <div class="splide" data-carousel={section.slug}>
+          <div class="splide__track">
+            <ul class="splide__list">
+              {section.articles.map(({ entry, categoryMeta, formattedDate }) => (
+                <li class="splide__slide">
+                  <article class="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/70 transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(10,95,102,0.16)]">
+                    <div class="relative h-44 overflow-hidden">
+                      <img src={entry.data.image} alt={entry.data.titleEn} class="h-full w-full object-cover" loading="lazy" />
+                      <span class="absolute left-4 top-4 rounded-full bg-[#0a5f66]/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white">
+                        <span class="lang lang-en">{categoryMeta.titleEn}</span>
+                        <span class="lang lang-es">{categoryMeta.titleEs}</span>
                       </span>
                     </div>
-                  </div>
-                </article>
+                    <div class="flex flex-1 flex-col gap-3 p-5">
+                      <h3 class="text-xl font-bold text-[#0a5f66]">
+                        <span class="lang lang-en">{entry.data.titleEn}</span>
+                        <span class="lang lang-es">{entry.data.titleEs}</span>
+                      </h3>
+                      <p class="text-sm text-slate-600 flex-1">
+                        <span class="lang lang-en">{entry.data.summaryEn}</span>
+                        <span class="lang lang-es">{entry.data.summaryEs}</span>
+                      </p>
+                      <div class="flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
+                        <span>{entry.data.author}</span>
+                        <span>
+                          <span class="lang lang-en">{formattedDate.en}</span>
+                          <span class="lang lang-es">{formattedDate.es}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </li>
               ))}
-            </div>
-          </section>
-        ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+    ))}
 
+  <section class="grid gap-8 lg:grid-cols-[2fr_1fr]">
+    <div class="space-y-8">
       {nonHeroSections
         .filter((section) => section.layout === "list")
         .map((section) => (
@@ -343,6 +309,17 @@ const heroDateLabels = heroArticle?.formattedDate;
             </div>
           </section>
         ))}
+
+      <section class="grid gap-6 rounded-3xl border border-dashed border-white/50 bg-white/60 p-6 text-center text-slate-500">
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#0a5f66]">
+          <span class="lang lang-en">Advertisement</span>
+          <span class="lang lang-es">Publicidad</span>
+        </p>
+        <p class="text-sm text-slate-500">
+          <span class="lang lang-en">Feature a local business or community event here.</span>
+          <span class="lang lang-es">Destaca un negocio local o evento comunitario aquí.</span>
+        </p>
+      </section>
     </div>
 
     <div class="space-y-8">
@@ -402,15 +379,109 @@ const heroDateLabels = heroArticle?.formattedDate;
         ))}
     </div>
   </section>
-
-  <section class="grid gap-6 rounded-3xl border border-dashed border-white/50 bg-white/60 p-6 text-center text-slate-500">
-    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#0a5f66]">
-      <span class="lang lang-en">Advertisement</span>
-      <span class="lang lang-es">Publicidad</span>
-    </p>
-    <p class="text-sm text-slate-500">
-      <span class="lang lang-en">Feature a local business or community event here.</span>
-      <span class="lang lang-es">Destaca un negocio local o evento comunitario aquí.</span>
-    </p>
-  </section>
 </BaseLayout>
+
+<script>
+  import Splide from '@splidejs/splide';
+
+  console.log('Script loaded, Splide:', Splide);
+
+  const initCarousels = () => {
+    console.log('Initializing carousels...');
+    const carousels = document.querySelectorAll('.splide');
+    console.log('Found carousels:', carousels.length);
+
+    carousels.forEach((carousel, index) => {
+      console.log(`Initializing carousel ${index}:`, carousel);
+
+      try {
+        const splide = new Splide(carousel as HTMLElement, {
+          type: 'loop',
+          perPage: 3,
+          perMove: 1,
+          gap: '1.5rem',
+          arrows: true,
+          pagination: false,
+          breakpoints: {
+            1280: {
+              perPage: 4,
+            },
+            1024: {
+              perPage: 3,
+            },
+            768: {
+              perPage: 2,
+            },
+            640: {
+              perPage: 1,
+            },
+          },
+        });
+
+        splide.mount();
+        console.log(`Carousel ${index} mounted successfully`);
+      } catch (error) {
+        console.error(`Error mounting carousel ${index}:`, error);
+      }
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCarousels);
+  } else {
+    initCarousels();
+  }
+</script>
+
+<style is:global>
+  .splide {
+    padding: 0 3rem;
+  }
+
+  .splide__track {
+    overflow: hidden;
+  }
+
+  .splide__list {
+    display: flex;
+    align-items: stretch;
+  }
+
+  .splide__slide {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .splide__arrow {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background-color: #0a5f66;
+    padding: 0.75rem;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    transition: all 0.2s;
+  }
+
+  .splide__arrow:hover {
+    background-color: #48d1d1;
+  }
+
+  .splide__arrow:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(72, 209, 209, 0.5);
+  }
+
+  .splide__arrow--prev {
+    left: 0;
+  }
+
+  .splide__arrow--next {
+    right: 0;
+  }
+
+  .splide__arrow svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+</style>
