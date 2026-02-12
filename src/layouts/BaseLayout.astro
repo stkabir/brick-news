@@ -40,38 +40,22 @@ const {
   <body class="bg-[#f3fbfb] text-slate-900">
     <header class="shadow-[0_12px_32px_rgba(9,86,92,0.12)]">
       <div class="bg-[#1a9d9d] text-white">
-        <div class="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] md:flex-row md:items-center md:justify-between">
-          <span>
+        <div class="relative mx-auto px-6 py-3 text-center">
+          <span class="text-xs font-semibold uppercase tracking-[0.2em]">
             <span class="lang lang-en">Your local source for Brickell news</span>
             <span class="lang lang-es">Tu fuente local de noticias de Brickell</span>
           </span>
           <button
             type="button"
             data-lang-toggle
-            class="self-start rounded-full bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.24em] transition hover:bg-white/20 md:self-auto"
+            class="absolute right-6 top-1/2 -translate-y-1/2 rounded-full bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.24em] transition hover:bg-white/20"
           >
             <span class="lang lang-en">ES</span>
             <span class="lang lang-es">EN</span>
           </button>
         </div>
       </div>
-      <div class="bg-[#48d1d1]">
-        <div class="mx-auto px-6 py-8">
-          <div>
-            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-white/80">
-              <span class="lang lang-en">Brickell</span>
-              <span class="lang lang-es">Brickell</span>
-            </p>
-            <h1 class="text-4xl font-extrabold text-white drop-shadow-sm md:text-5xl">
-              <span class="lang lang-en">Brickell News</span>
-              <span class="lang lang-es">Noticias Brickell</span>
-            </h1>
-            <p class="mt-2 max-w-xl text-sm text-white/90">
-              <span class="lang lang-en">{descriptionEn}</span>
-              <span class="lang lang-es">{descriptionEs}</span>
-            </p>
-          </div>
-        </div>
+      <div class="bg-[#48d1d1] bg-[url('/img/logo.png')] bg-size-[450px] bg-center bg-no-repeat h-[200px]">
       </div>
       <nav class="bg-white/90">
         <div class="mx-auto flex items-center justify-between gap-4 px-6 py-3">
