@@ -20,6 +20,20 @@ const {
   descriptionEn = "Your local source for Brickell news.",
   descriptionEs = "Tu fuente local de noticias de Brickell.",
 } = Astro.props;
+
+const now = new Date();
+const dateEn = now.toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+const dateEs = now.toLocaleDateString("es-ES", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 ---
 <html lang="en" data-locale="en" class="scroll-smooth">
   <head>
@@ -33,117 +47,127 @@ const {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body class="bg-[#f3fbfb] text-slate-900">
-    <header class="shadow-[0_12px_32px_rgba(9,86,92,0.12)]">
-      <div class="bg-[#1a9d9d] text-white">
-        <div class="relative mx-auto px-6 py-3 text-center">
-          <span class="text-xs font-semibold uppercase tracking-[0.2em]">
-            <span class="lang lang-en">Your local source for Brickell news</span>
-            <span class="lang lang-es">Tu fuente local de noticias de Brickell</span>
+  <body class="bg-paper text-ink">
+
+    <!-- ═══ Dateline Bar ═══ -->
+    <div class="border-b border-rule-light">
+      <div class="mx-auto max-w-6xl flex items-center justify-between px-6 py-2.5">
+        <p class="font-label text-[11px] tracking-[0.15em] uppercase text-ink-faded">
+          <span class="lang lang-en">{dateEn}</span>
+          <span class="lang lang-es">{dateEs}</span>
+          <span class="hidden sm:inline">
+            <span class="mx-2 text-rule-light">|</span>
+            Miami, Florida
+          </span>
+        </p>
+        <div class="flex items-center gap-4">
+          <span class="font-label text-[10px] tracking-[0.2em] uppercase text-ink-faded hidden sm:inline">
+            <span class="lang lang-en">Daily Edition</span>
+            <span class="lang lang-es">Edición Diaria</span>
           </span>
           <button
             type="button"
             data-lang-toggle
-            class="absolute right-6 top-1/2 -translate-y-1/2 rounded-full bg-white/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.24em] transition hover:bg-white/20"
+            class="font-label border border-rule px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-ink transition-colors hover:bg-ink hover:text-paper"
           >
-            <span class="lang lang-en">ES</span>
-            <span class="lang lang-es">EN</span>
+            <span class="lang lang-en">Español</span>
+            <span class="lang lang-es">English</span>
           </button>
         </div>
       </div>
-      <div class="bg-[#48d1d1] bg-[url('/img/logo.png')] bg-size-[450px] bg-center bg-no-repeat h-[200px]">
+    </div>
+
+    <!-- ═══ Masthead ═══ -->
+    <header class="mx-auto max-w-6xl px-6 pt-8 pb-2 text-center">
+      <div class="border-t border-rule"></div>
+      <div class="py-5">
+        <h1 class="font-masthead text-5xl sm:text-6xl md:text-8xl tracking-[0.04em] leading-none">
+          Brickell News
+        </h1>
+        <p class="mt-3 font-label text-[11px] tracking-[0.3em] uppercase text-ink-faded">
+          <span class="lang lang-en">Miami's Bilingual Neighborhood Journal</span>
+          <span class="lang lang-es">El Periódico Bilingüe del Vecindario Brickell</span>
+        </p>
       </div>
-      <nav class="bg-white/90">
-        <div class="mx-auto flex items-center justify-between gap-4 px-6 py-3">
-          <div class="flex items-center gap-4 overflow-x-auto text-sm font-semibold uppercase tracking-[0.2em] text-[#0a5f66]">
-            <a href="#top" class="rounded-full px-3 py-1 transition hover:bg-[#48d1d1]/10">
-              <span class="lang lang-en">Home</span>
-              <span class="lang lang-es">Inicio</span>
-            </a>
-            {navLinks.map((link) => (
-              <a
-                href={`#${link.slug}`}
-                class="whitespace-nowrap rounded-full px-3 py-1 transition hover:bg-[#48d1d1]/10"
-              >
-                <span class="lang lang-en">{link.titleEn}</span>
-                <span class="lang lang-es">{link.titleEs}</span>
-              </a>
-            ))}
-          </div>
-          <form action="#" class="relative w-full max-w-xs">
-            <label class="sr-only" for="search">
-              <span class="lang lang-en">Search news</span>
-              <span class="lang lang-es">Buscar noticias</span>
-            </label>
-            <input
-              id="search"
-              name="search"
-              type="search"
-              placeholder="Search Brickell"
-              class="w-full rounded-full border border-[#48d1d1]/40 bg-white px-4 py-2 pr-10 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:border-[#48d1d1] focus:outline-none focus:ring-2 focus:ring-[#48d1d1]/30"
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0a5f66]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-              />
-            </svg>
-          </form>
-        </div>
-      </nav>
+      <div class="border-t-[3px] border-double border-rule"></div>
     </header>
-    <main id="top" class="mx-auto flex flex-col gap-12 px-6 py-6">
+
+    <!-- ═══ Navigation ═══ -->
+    <nav class="border-b border-rule-light overflow-x-auto">
+      <div class="mx-auto max-w-6xl flex items-center justify-center gap-1 px-6 py-3 font-label whitespace-nowrap">
+        <a href="#top" class="px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors hover:text-accent">
+          <span class="lang lang-en">Home</span>
+          <span class="lang lang-es">Inicio</span>
+        </a>
+        {navLinks.map((link) => (
+          <>
+            <span class="text-rule-light text-[10px] select-none">&#183;</span>
+            <a
+              href={`#${link.slug}`}
+              class="px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] transition-colors hover:text-accent"
+            >
+              <span class="lang lang-en">{link.titleEn}</span>
+              <span class="lang lang-es">{link.titleEs}</span>
+            </a>
+          </>
+        ))}
+      </div>
+    </nav>
+
+    <!-- ═══ Main Content ═══ -->
+    <main id="top" class="mx-auto max-w-6xl px-6 py-8">
       <slot />
     </main>
-    <footer class="bg-[#0a5f66] py-12 text-white">
-      <div class="mx-auto flex max-w-6xl flex-col gap-6 px-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h2 class="text-2xl font-bold">
-            <span class="lang lang-en">Stay connected to Brickell</span>
-            <span class="lang lang-es">Mantente conectado con Brickell</span>
+
+    <!-- ═══ Footer ═══ -->
+    <footer class="border-t-[3px] border-double border-rule">
+      <div class="mx-auto max-w-6xl px-6 py-10">
+        <div class="border border-rule p-8 text-center">
+          <p class="font-label text-[9px] font-bold uppercase tracking-[0.35em] text-ink-faded mb-4">
+            <span class="lang lang-en">Newsletter</span>
+            <span class="lang lang-es">Boletín</span>
+          </p>
+          <h2 class="font-headline text-2xl md:text-3xl">
+            <span class="lang lang-en">Subscribe to Brickell News</span>
+            <span class="lang lang-es">Suscríbete a Brickell News</span>
           </h2>
-          <p class="mt-2 max-w-md text-sm text-white/80">
+          <p class="mt-2 text-sm text-ink-light font-article">
             <span class="lang lang-en">Weekly highlights delivered in English and Spanish.</span>
-            <span class="lang lang-es">Destacados semanales entregados en inglés y español.</span>
+            <span class="lang lang-es">Destacados semanales en inglés y español.</span>
+          </p>
+          <form class="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <label class="sr-only" for="newsletter-email">Email</label>
+            <input
+              id="newsletter-email"
+              type="email"
+              placeholder="hello@brickell.news"
+              class="font-label flex-1 border border-rule bg-transparent px-4 py-2.5 text-sm focus:outline-none focus:border-accent"
+            />
+            <button
+              type="submit"
+              class="font-label bg-ink text-paper px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] transition-colors hover:bg-accent"
+            >
+              <span class="lang lang-en">Subscribe</span>
+              <span class="lang lang-es">Suscribirse</span>
+            </button>
+          </form>
+        </div>
+        <div class="mt-8 border-t border-rule-light pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="font-label text-[10px] uppercase tracking-[0.25em] text-ink-faded">
+            <span class="lang lang-en">&copy; {new Date().getFullYear()} Brickell News &mdash; All rights reserved</span>
+            <span class="lang lang-es">&copy; {new Date().getFullYear()} Brickell News &mdash; Todos los derechos reservados</span>
+          </p>
+          <p class="font-label text-[10px] uppercase tracking-[0.25em] text-ink-faded">
+            Miami, Florida
           </p>
         </div>
-        <form class="flex w-full max-w-md flex-col gap-3 md:flex-row">
-          <label class="sr-only" for="newsletter-email">
-            <span class="lang lang-en">Email address</span>
-            <span class="lang lang-es">Correo electrónico</span>
-          </label>
-          <input
-            id="newsletter-email"
-            type="email"
-            placeholder="hello@brickell.news"
-            class="w-full rounded-full border border-white/30 bg-white px-5 py-3 text-slate-900 placeholder:text-slate-500 focus:border-white/70 focus:outline-none focus:ring-2 focus:ring-white/50"
-          />
-          <button
-            type="submit"
-            class="rounded-full bg-[#48d1d1] px-6 py-3 text-sm font-bold uppercase tracking-[0.2em] text-[#0a5f66] transition hover:bg-white"
-          >
-            <span class="lang lang-en">Subscribe</span>
-            <span class="lang lang-es">Suscribirse</span>
-          </button>
-        </form>
-      </div>
-      <div class="mt-8 text-center text-xs uppercase tracking-[0.3em] text-white/60">
-        <span class="lang lang-en">© {new Date().getFullYear()} Brickell News</span>
-        <span class="lang lang-es">© {new Date().getFullYear()} Noticias Brickell</span>
       </div>
     </footer>
+
     <script is:inline>
       const storageKey = "brickell-news-locale";
       const root = document.documentElement;

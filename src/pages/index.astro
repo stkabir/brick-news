@@ -1,7 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import "@splidejs/splide/css";
 
 type CategoryEntry = CollectionEntry<"categories">;
 type SectionEntry = CollectionEntry<"sections">;
@@ -63,7 +62,7 @@ const getCategoryMeta = (slug: string): CategoryMeta => {
   return {
     titleEn: entry?.titleEn ?? slug,
     titleEs: entry?.titleEs ?? slug,
-    accentColor: entry?.accentColor ?? "#48d1d1",
+    accentColor: entry?.accentColor ?? "#8b0000",
   };
 };
 
@@ -118,6 +117,15 @@ const heroArticle = heroSection?.articles[0];
 const heroEntry = heroArticle?.entry;
 const heroCategoryMeta = heroArticle?.categoryMeta;
 const heroDateLabels = heroArticle?.formattedDate;
+
+const gridSection = nonHeroSections.find((s) => s.layout === "grid");
+const gridArticles = gridSection?.articles ?? [];
+const frontSidebar = gridArticles
+  .filter((a) => a.entry.slug !== heroEntry?.slug)
+  .slice(0, 3);
+
+const trendingFeatured = gridArticles[0];
+const trendingRest = gridArticles.slice(1, 4);
 ---
 
 <BaseLayout
@@ -126,362 +134,281 @@ const heroDateLabels = heroArticle?.formattedDate;
   descriptionEn="Your bilingual hub for Brickell's headlines, business, lifestyle, and events."
   descriptionEs="Tu centro bilingüe para titulares, negocios, estilo de vida y eventos de Brickell."
 >
-  {heroSection && heroSection.articles.length > 0 ? (
-    <section
-      id={heroSection.slug}
-      class="grid gap-6 rounded-3xl bg-white/80 p-6 h-[448px]
-      shadow-[0_18px_42px_rgba(10,95,102,0.14)] backdrop-blur"
-    >
-      <div class="flex flex-col gap-8 lg:flex-row h-[400px]">
-        <div class="relative flex-1 overflow-hidden rounded-3xl bg-slate-900/10">
-          <video
-            src="/img/vid-brickell.mp4"
-            class="h-full w-full object-cover"
-            autoplay
-            loop
-            muted
-            playsinline
-          />
-          <div class="absolute inset-0 bg-linear-to-br from-[#0a5f66]/90 via-[#0a5f66]/40 to-transparent" />
-          <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em]">
-              <span class="rounded-full bg-white/20 px-3 py-1">
-                <span class="lang lang-en">{heroCategoryMeta?.titleEn}</span>
-                <span class="lang lang-es">{heroCategoryMeta?.titleEs}</span>
-              </span>
-              <span>
-                <span class="lang lang-en">{heroDateLabels?.en}</span>
-                <span class="lang lang-es">{heroDateLabels?.es}</span>
-              </span>
-            </div>
-            <h2 class="mt-4 text-3xl font-extrabold md:text-4xl">
-              <span class="lang lang-en">{heroEntry?.data.titleEn}</span>
-              <span class="lang lang-es">{heroEntry?.data.titleEs}</span>
-            </h2>
-            <p class="mt-3 text-sm text-white/90">
-              <span class="lang lang-en">{heroEntry?.data.summaryEn}</span>
-              <span class="lang lang-es">{heroEntry?.data.summaryEs}</span>
-            </p>
-            <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-xs font-bold uppercase tracking-[0.28em] text-[#0a5f66] transition hover:bg-[#48d1d1]/20">
-              <span class="lang lang-en">Read story</span>
-              <span class="lang lang-es">Leer historia</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="h-4 w-4"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+
+  <!-- ════════════════════════════════════════════════════
+       FRONT PAGE — Above the Fold
+       ════════════════════════════════════════════════════ -->
+  {heroSection && heroEntry ? (
+    <section id={heroSection.slug} class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 pb-8 border-b border-rule-light reveal">
+
+      <!-- Main Story -->
+      <div class="lg:pr-8 lg:border-r lg:border-rule-light">
+        <img
+          src={heroEntry.data.image}
+          alt={heroEntry.data.titleEn}
+          class="w-full h-[280px] sm:h-[360px] object-cover"
+          loading="eager"
+        />
+        <div class="pt-5">
+          <p class="font-label text-[10px] font-bold uppercase tracking-[0.25em] text-accent">
+            <span class="lang lang-en">{heroCategoryMeta?.titleEn}</span>
+            <span class="lang lang-es">{heroCategoryMeta?.titleEs}</span>
+          </p>
+          <h2 class="mt-2 font-headline text-3xl sm:text-4xl lg:text-5xl font-black leading-[1.1]">
+            <span class="lang lang-en">{heroEntry.data.titleEn}</span>
+            <span class="lang lang-es">{heroEntry.data.titleEs}</span>
+          </h2>
+          <p class="mt-4 text-lg leading-relaxed text-ink-light font-article drop-cap">
+            <span class="lang lang-en">{heroEntry.data.summaryEn}</span>
+            <span class="lang lang-es">{heroEntry.data.summaryEs}</span>
+          </p>
+          <p class="mt-4 font-label text-[10px] uppercase tracking-[0.18em] text-ink-faded">
+            <span class="lang lang-en">By {heroEntry.data.author} &mdash; {heroDateLabels?.en}</span>
+            <span class="lang lang-es">Por {heroEntry.data.author} &mdash; {heroDateLabels?.es}</span>
+          </p>
         </div>
+      </div>
+
+      <!-- Front-Page Sidebar -->
+      <aside class="lg:pl-8 pt-6 lg:pt-0">
+        <p class="font-label text-[9px] font-bold uppercase tracking-[0.35em] text-ink-faded border-b border-rule pb-2 mb-0">
+          <span class="lang lang-en">Also in this edition</span>
+          <span class="lang lang-es">También en esta edición</span>
+        </p>
+        {frontSidebar.map(({ entry, categoryMeta, formattedDate }) => (
+          <article class="group py-4 border-b border-rule-light last:border-b-0">
+            <p class="font-label text-[9px] font-bold uppercase tracking-[0.25em] text-accent">
+              <span class="lang lang-en">{categoryMeta.titleEn}</span>
+              <span class="lang lang-es">{categoryMeta.titleEs}</span>
+            </p>
+            <h3 class="mt-1 font-headline text-lg font-bold leading-snug transition-colors group-hover:text-accent">
+              <span class="lang lang-en">{entry.data.titleEn}</span>
+              <span class="lang lang-es">{entry.data.titleEs}</span>
+            </h3>
+            <p class="mt-1.5 text-sm text-ink-light leading-relaxed line-clamp-2">
+              <span class="lang lang-en">{entry.data.summaryEn}</span>
+              <span class="lang lang-es">{entry.data.summaryEs}</span>
+            </p>
+            <p class="mt-2 font-label text-[9px] uppercase tracking-[0.15em] text-ink-faded">
+              <span class="lang lang-en">{entry.data.author} &mdash; {formattedDate.en}</span>
+              <span class="lang lang-es">{entry.data.author} &mdash; {formattedDate.es}</span>
+            </p>
+          </article>
+        ))}
+      </aside>
+
+    </section>
+  ) : null}
+
+
+  <!-- ════════════════════════════════════════════════════
+       SECTION DIVIDER
+       ════════════════════════════════════════════════════ -->
+  <div class="flex items-center gap-4 my-8" role="separator" aria-hidden="true">
+    <div class="flex-1 border-t border-rule"></div>
+    <span class="text-rule-light text-sm leading-none select-none">&#9670;</span>
+    <div class="flex-1 border-t border-rule"></div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       TRENDING DEVELOPMENTS
+       ════════════════════════════════════════════════════ -->
+  {gridSection && gridArticles.length > 0 ? (
+    <section id={gridSection.slug} class="reveal">
+      <h2 class="font-headline text-xl sm:text-2xl text-center border-y-2 border-rule py-2 mb-8 uppercase tracking-[0.12em]">
+        <span class="lang lang-en">{gridSection.titleEn}</span>
+        <span class="lang lang-es">{gridSection.titleEs}</span>
+      </h2>
+
+      <!-- Featured Article -->
+      {trendingFeatured && (
+        <article class="group grid grid-cols-1 md:grid-cols-2 gap-6 pb-8 border-b border-rule-light">
+          <img
+            src={trendingFeatured.entry.data.image}
+            alt={trendingFeatured.entry.data.titleEn}
+            class="w-full h-56 md:h-72 object-cover newspaper-img"
+            loading="lazy"
+          />
+          <div class="flex flex-col justify-center">
+            <p class="font-label text-[10px] font-bold uppercase tracking-[0.25em] text-accent">
+              <span class="lang lang-en">{trendingFeatured.categoryMeta.titleEn}</span>
+              <span class="lang lang-es">{trendingFeatured.categoryMeta.titleEs}</span>
+            </p>
+            <h3 class="mt-2 font-headline text-2xl sm:text-3xl font-bold leading-snug transition-colors group-hover:text-accent">
+              <span class="lang lang-en">{trendingFeatured.entry.data.titleEn}</span>
+              <span class="lang lang-es">{trendingFeatured.entry.data.titleEs}</span>
+            </h3>
+            <p class="mt-3 text-ink-light leading-relaxed">
+              <span class="lang lang-en">{trendingFeatured.entry.data.summaryEn}</span>
+              <span class="lang lang-es">{trendingFeatured.entry.data.summaryEs}</span>
+            </p>
+            <p class="mt-4 font-label text-[10px] uppercase tracking-[0.18em] text-ink-faded">
+              <span class="lang lang-en">By {trendingFeatured.entry.data.author} &mdash; {trendingFeatured.formattedDate.en}</span>
+              <span class="lang lang-es">Por {trendingFeatured.entry.data.author} &mdash; {trendingFeatured.formattedDate.es}</span>
+            </p>
+          </div>
+        </article>
+      )}
+
+      <!-- Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-rule-light pt-6">
+        {trendingRest.map(({ entry, categoryMeta, formattedDate }, i) => (
+          <article class={`group px-0 sm:px-5 py-4 sm:py-0 ${i === 0 ? 'sm:pl-0' : ''} ${i === trendingRest.length - 1 ? 'sm:pr-0' : ''}`}>
+            <img
+              src={entry.data.image}
+              alt={entry.data.titleEn}
+              class="w-full h-44 object-cover newspaper-img"
+              loading="lazy"
+            />
+            <p class="mt-3 font-label text-[9px] font-bold uppercase tracking-[0.25em] text-accent">
+              <span class="lang lang-en">{categoryMeta.titleEn}</span>
+              <span class="lang lang-es">{categoryMeta.titleEs}</span>
+            </p>
+            <h3 class="mt-1 font-headline text-lg font-bold leading-snug transition-colors group-hover:text-accent">
+              <span class="lang lang-en">{entry.data.titleEn}</span>
+              <span class="lang lang-es">{entry.data.titleEs}</span>
+            </h3>
+            <p class="mt-2 text-sm text-ink-light leading-relaxed line-clamp-3">
+              <span class="lang lang-en">{entry.data.summaryEn}</span>
+              <span class="lang lang-es">{entry.data.summaryEs}</span>
+            </p>
+            <p class="mt-3 font-label text-[9px] uppercase tracking-[0.15em] text-ink-faded">
+              <span class="lang lang-en">{entry.data.author} &mdash; {formattedDate.en}</span>
+              <span class="lang lang-es">{entry.data.author} &mdash; {formattedDate.es}</span>
+            </p>
+          </article>
+        ))}
       </div>
     </section>
   ) : null}
 
-  {nonHeroSections
-    .filter((section) => section.layout === "grid")
-    .map((section) => (
-      <section
-        id={section.slug}
-        class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-      >
-        <header class="mb-6 flex items-center justify-between gap-4">
-          <div>
-            <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
+
+  <!-- ════════════════════════════════════════════════════
+       SECTION DIVIDER
+       ════════════════════════════════════════════════════ -->
+  <div class="flex items-center gap-4 my-8" role="separator" aria-hidden="true">
+    <div class="flex-1 border-t border-rule"></div>
+    <span class="text-rule-light text-sm leading-none select-none">&#9670;</span>
+    <div class="flex-1 border-t border-rule"></div>
+  </div>
+
+
+  <!-- ════════════════════════════════════════════════════
+       LATEST UPDATES + LIVING IN BRICKELL (Sidebar)
+       ════════════════════════════════════════════════════ -->
+  <section class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-0 reveal">
+
+    <!-- Latest Updates (left column) -->
+    <div class="lg:pr-8 lg:border-r lg:border-rule-light">
+      {nonHeroSections
+        .filter((section) => section.layout === "list")
+        .map((section) => (
+          <div id={section.slug}>
+            <h2 class="font-headline text-xl uppercase tracking-[0.1em] border-b-2 border-rule pb-2 mb-0">
               <span class="lang lang-en">{section.titleEn}</span>
               <span class="lang lang-es">{section.titleEs}</span>
             </h2>
-            {(section.descriptionEn || section.descriptionEs) && (
-              <p class="mt-2 text-sm text-slate-600">
+            {section.descriptionEn && (
+              <p class="mt-2 text-sm text-ink-faded font-article italic">
                 <span class="lang lang-en">{section.descriptionEn}</span>
                 <span class="lang lang-es">{section.descriptionEs}</span>
               </p>
             )}
-          </div>
-          <div class="hidden gap-2 md:flex">
-            {section.articles.slice(0, 4).map(({ categoryMeta }) => (
-              <span
-                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]"
-                style={{ backgroundColor: `${categoryMeta.accentColor}1A` }}
-              >
-                <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                <span class="lang lang-es">{categoryMeta.titleEs}</span>
-              </span>
-            ))}
-          </div>
-        </header>
-        <div class="splide" data-carousel={section.slug}>
-          <div class="splide__track">
-            <ul class="splide__list">
-              {section.articles.map(({ entry, categoryMeta, formattedDate }) => (
-                <li class="splide__slide">
-                  <article class="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/70 transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(10,95,102,0.16)]">
-                    <div class="relative h-44 overflow-hidden">
-                      <img src={entry.data.image} alt={entry.data.titleEn} class="h-full w-full object-cover" loading="lazy" />
-                      <span class="absolute left-4 top-4 rounded-full bg-[#0a5f66]/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white">
-                        <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                        <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                      </span>
-                    </div>
-                    <div class="flex flex-1 flex-col gap-3 p-5">
-                      <h3 class="text-xl font-bold text-[#0a5f66]">
-                        <span class="lang lang-en">{entry.data.titleEn}</span>
-                        <span class="lang lang-es">{entry.data.titleEs}</span>
-                      </h3>
-                      <p class="text-sm text-slate-600 flex-1">
-                        <span class="lang lang-en">{entry.data.summaryEn}</span>
-                        <span class="lang lang-es">{entry.data.summaryEs}</span>
-                      </p>
-                      <div class="flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
-                        <span>{entry.data.author}</span>
-                        <span>
-                          <span class="lang lang-en">{formattedDate.en}</span>
-                          <span class="lang lang-es">{formattedDate.es}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-    ))}
-
-  <section class="grid gap-8 lg:grid-cols-[2fr_1fr]">
-    <div class="space-y-8">
-      {nonHeroSections
-        .filter((section) => section.layout === "list")
-        .map((section) => (
-          <section
-            id={section.slug}
-            class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-          >
-            <header class="mb-4">
-              <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-                <span class="lang lang-en">{section.titleEn}</span>
-                <span class="lang lang-es">{section.titleEs}</span>
-              </h2>
-              {(section.descriptionEn || section.descriptionEs) && (
-                <p class="mt-2 text-sm text-slate-600">
-                  <span class="lang lang-en">{section.descriptionEn}</span>
-                  <span class="lang lang-es">{section.descriptionEs}</span>
-                </p>
-              )}
-            </header>
-            <div class="space-y-4">
-              {section.articles.slice(0, 4).map(({ entry, categoryMeta, formattedDate }) => (
-                <article class="flex flex-col gap-3 rounded-2xl border border-[#48d1d1]/30 bg-[#48d1d1]/10 p-4 transition hover:bg-[#48d1d1]/20 md:flex-row md:items-center">
+            <div class="divide-y divide-rule-light">
+              {section.articles.slice(0, 5).map(({ entry, categoryMeta, formattedDate }) => (
+                <article class="group flex flex-col sm:flex-row gap-4 py-5">
                   <img
                     src={entry.data.image}
                     alt={entry.data.titleEn}
-                    class="h-20 w-28 rounded-xl object-cover"
+                    class="w-full sm:w-28 h-28 sm:h-24 object-cover flex-shrink-0 newspaper-img"
                     loading="lazy"
                   />
-                  <div class="flex-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]">
+                  <div class="flex-1 min-w-0">
+                    <p class="font-label text-[9px] font-bold uppercase tracking-[0.25em] text-accent">
                       <span class="lang lang-en">{categoryMeta.titleEn}</span>
                       <span class="lang lang-es">{categoryMeta.titleEs}</span>
                     </p>
-                    <h3 class="mt-1 text-lg font-bold text-[#0a5f66]">
+                    <h3 class="mt-1 font-headline text-lg font-bold leading-snug transition-colors group-hover:text-accent">
                       <span class="lang lang-en">{entry.data.titleEn}</span>
                       <span class="lang lang-es">{entry.data.titleEs}</span>
                     </h3>
-                    <p class="mt-1 text-sm text-slate-600">
+                    <p class="mt-1 text-sm text-ink-light leading-relaxed line-clamp-2">
                       <span class="lang lang-en">{entry.data.summaryEn}</span>
                       <span class="lang lang-es">{entry.data.summaryEs}</span>
                     </p>
-                  </div>
-                  <div class="flex flex-col items-end gap-1 text-xs uppercase tracking-[0.28em] text-slate-500">
-                    <span>{entry.data.author}</span>
-                    <span>
-                      <span class="lang lang-en">{formattedDate.en}</span>
-                      <span class="lang lang-es">{formattedDate.es}</span>
-                    </span>
+                    <p class="mt-2 font-label text-[9px] uppercase tracking-[0.15em] text-ink-faded">
+                      <span class="lang lang-en">{entry.data.author} &mdash; {formattedDate.en}</span>
+                      <span class="lang lang-es">{entry.data.author} &mdash; {formattedDate.es}</span>
+                    </p>
                   </div>
                 </article>
               ))}
             </div>
-          </section>
+          </div>
         ))}
 
-      <section class="grid gap-6 rounded-3xl border border-dashed border-white/50 bg-white/60 p-6 text-center text-slate-500">
-        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#0a5f66]">
+      <!-- Classified Ad -->
+      <div class="border-2 border-dashed border-rule-light p-6 text-center my-6">
+        <p class="font-label text-[9px] font-bold uppercase tracking-[0.35em] text-ink-faded">
           <span class="lang lang-en">Advertisement</span>
           <span class="lang lang-es">Publicidad</span>
         </p>
-        <p class="text-sm text-slate-500">
+        <p class="mt-2 text-sm text-ink-faded font-article italic">
           <span class="lang lang-en">Feature a local business or community event here.</span>
           <span class="lang lang-es">Destaca un negocio local o evento comunitario aquí.</span>
         </p>
-      </section>
+      </div>
     </div>
 
-    <div class="space-y-8">
+    <!-- Living in Brickell (right sidebar) -->
+    <aside class="lg:pl-8 pt-6 lg:pt-0">
       {nonHeroSections
         .filter((section) => section.layout === "sidebar")
         .map((section) => (
-          <aside
-            id={section.slug}
-            class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-          >
-            <header class="mb-4">
-              <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-                <span class="lang lang-en">{section.titleEn}</span>
-                <span class="lang lang-es">{section.titleEs}</span>
-              </h2>
-              {(section.descriptionEn || section.descriptionEs) && (
-                <p class="mt-2 text-sm text-slate-600">
-                  <span class="lang lang-en">{section.descriptionEn}</span>
-                  <span class="lang lang-es">{section.descriptionEs}</span>
-                </p>
-              )}
-            </header>
-            <div class="space-y-6">
+          <div id={section.slug}>
+            <h2 class="font-headline text-xl uppercase tracking-[0.1em] border-b-2 border-rule pb-2 mb-0">
+              <span class="lang lang-en">{section.titleEn}</span>
+              <span class="lang lang-es">{section.titleEs}</span>
+            </h2>
+            {section.descriptionEn && (
+              <p class="mt-2 text-sm text-ink-faded font-article italic">
+                <span class="lang lang-en">{section.descriptionEn}</span>
+                <span class="lang lang-es">{section.descriptionEs}</span>
+              </p>
+            )}
+            <div class="divide-y divide-rule-light">
               {section.articles.slice(0, 4).map(({ entry, categoryMeta, formattedDate }) => (
-                <article class="flex flex-col gap-3 rounded-2xl border border-[#48d1d1]/20 bg-[#48d1d1]/5 p-4">
+                <article class="group py-5">
                   <img
                     src={entry.data.image}
                     alt={entry.data.titleEn}
-                    class="h-40 w-full rounded-2xl object-cover"
+                    class="w-full h-44 object-cover newspaper-img"
                     loading="lazy"
                   />
-                  <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]">
-                      <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                      <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                    </p>
-                    <h3 class="mt-2 text-lg font-bold text-[#0a5f66]">
-                      <span class="lang lang-en">{entry.data.titleEn}</span>
-                      <span class="lang lang-es">{entry.data.titleEs}</span>
-                    </h3>
-                    <p class="mt-1 text-sm text-slate-600">
-                      <span class="lang lang-en">{entry.data.summaryEn}</span>
-                      <span class="lang lang-es">{entry.data.summaryEs}</span>
-                    </p>
-                    <div class="mt-3 flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
-                      <span>{entry.data.author}</span>
-                      <span>
-                        <span class="lang lang-en">{formattedDate.en}</span>
-                        <span class="lang lang-es">{formattedDate.es}</span>
-                      </span>
-                    </div>
-                  </div>
+                  <p class="mt-3 font-label text-[9px] font-bold uppercase tracking-[0.25em] text-accent">
+                    <span class="lang lang-en">{categoryMeta.titleEn}</span>
+                    <span class="lang lang-es">{categoryMeta.titleEs}</span>
+                  </p>
+                  <h3 class="mt-1 font-headline text-lg font-bold leading-snug transition-colors group-hover:text-accent">
+                    <span class="lang lang-en">{entry.data.titleEn}</span>
+                    <span class="lang lang-es">{entry.data.titleEs}</span>
+                  </h3>
+                  <p class="mt-1.5 text-sm text-ink-light leading-relaxed line-clamp-3">
+                    <span class="lang lang-en">{entry.data.summaryEn}</span>
+                    <span class="lang lang-es">{entry.data.summaryEs}</span>
+                  </p>
+                  <p class="mt-2 font-label text-[9px] uppercase tracking-[0.15em] text-ink-faded">
+                    <span class="lang lang-en">{entry.data.author} &mdash; {formattedDate.en}</span>
+                    <span class="lang lang-es">{entry.data.author} &mdash; {formattedDate.es}</span>
+                  </p>
                 </article>
               ))}
             </div>
-          </aside>
+          </div>
         ))}
-    </div>
+    </aside>
+
   </section>
+
 </BaseLayout>
-
-<script>
-  import Splide from '@splidejs/splide';
-
-  console.log('Script loaded, Splide:', Splide);
-
-  const initCarousels = () => {
-    console.log('Initializing carousels...');
-    const carousels = document.querySelectorAll('.splide');
-    console.log('Found carousels:', carousels.length);
-
-    carousels.forEach((carousel, index) => {
-      console.log(`Initializing carousel ${index}:`, carousel);
-
-      try {
-        const splide = new Splide(carousel as HTMLElement, {
-          type: 'loop',
-          perPage: 3,
-          perMove: 1,
-          gap: '1.5rem',
-          arrows: true,
-          pagination: false,
-          breakpoints: {
-            1280: {
-              perPage: 4,
-            },
-            1024: {
-              perPage: 3,
-            },
-            768: {
-              perPage: 2,
-            },
-            640: {
-              perPage: 1,
-            },
-          },
-        });
-
-        splide.mount();
-        console.log(`Carousel ${index} mounted successfully`);
-      } catch (error) {
-        console.error(`Error mounting carousel ${index}:`, error);
-      }
-    });
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCarousels);
-  } else {
-    initCarousels();
-  }
-</script>
-
-<style is:global>
-  .splide {
-    padding: 0 3rem;
-  }
-
-  .splide__track {
-    overflow: hidden;
-  }
-
-  .splide__list {
-    display: flex;
-    align-items: stretch;
-  }
-
-  .splide__slide {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .splide__arrow {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 9999px;
-    background-color: #0a5f66;
-    padding: 0.75rem;
-    color: white;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    transition: all 0.2s;
-  }
-
-  .splide__arrow:hover {
-    background-color: #48d1d1;
-  }
-
-  .splide__arrow:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(72, 209, 209, 0.5);
-  }
-
-  .splide__arrow--prev {
-    left: 0;
-  }
-
-  .splide__arrow--next {
-    right: 0;
-  }
-
-  .splide__arrow svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-</style>
