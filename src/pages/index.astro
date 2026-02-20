@@ -1,43 +1,18 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import "@splidejs/splide/css";
 
 type CategoryEntry = CollectionEntry<"categories">;
 type SectionEntry = CollectionEntry<"sections">;
 type ArticleEntry = CollectionEntry<"articles">;
 
-type NavLink = {
-  slug: string;
-  titleEn: string;
-  titleEs: string;
-};
-
-type CategoryMeta = {
-  titleEn: string;
-  titleEs: string;
-  accentColor: string;
-};
-
-type DateLabels = {
-  en: string;
-  es: string;
-};
-
-type SectionArticle = {
+type NavLink = { slug: string; titleEn: string; titleEs: string };
+type CategoryMeta = { titleEn: string; titleEs: string; accentColor: string };
+type DateLabels = { en: string; es: string };
+type EnrichedArticle = {
   entry: ArticleEntry;
   categoryMeta: CategoryMeta;
   formattedDate: DateLabels;
-};
-
-type SectionGroup = {
-  slug: string;
-  layout: SectionEntry["data"]["layout"];
-  titleEn: string;
-  titleEs: string;
-  descriptionEn?: string;
-  descriptionEs?: string;
-  articles: SectionArticle[];
 };
 
 const [categoryEntries, sectionEntries, articleEntries] = await Promise.all([
@@ -47,77 +22,96 @@ const [categoryEntries, sectionEntries, articleEntries] = await Promise.all([
 ]);
 
 const navLinks: NavLink[] = categoryEntries
-  .filter((category: CategoryEntry) => category.data.nav)
-  .map((category: CategoryEntry) => ({
-    slug: category.slug,
-    titleEn: category.data.titleEn,
-    titleEs: category.data.titleEs,
+  .filter((c: CategoryEntry) => c.data.nav)
+  .map((c: CategoryEntry) => ({
+    slug: c.slug,
+    titleEn: c.data.titleEn,
+    titleEs: c.data.titleEs,
   }));
 
 const categoryMap = new Map<string, CategoryEntry>(
-  categoryEntries.map((entry: CategoryEntry) => [entry.slug, entry])
+  categoryEntries.map((e: CategoryEntry) => [e.slug, e])
 );
 
 const getCategoryMeta = (slug: string): CategoryMeta => {
-  const entry = categoryMap.get(slug)?.data;
+  const d = categoryMap.get(slug)?.data;
   return {
-    titleEn: entry?.titleEn ?? slug,
-    titleEs: entry?.titleEs ?? slug,
-    accentColor: entry?.accentColor ?? "#48d1d1",
+    titleEn: d?.titleEn ?? slug,
+    titleEs: d?.titleEs ?? slug,
+    accentColor: d?.accentColor ?? "#48d1d1",
   };
 };
 
-const dateFormatOptions: Intl.DateTimeFormatOptions = {
+const dateOpts: Intl.DateTimeFormatOptions = {
   month: "short",
   day: "numeric",
   year: "numeric",
 };
 
-const formatDateLabels = (isoDate: string): DateLabels => {
-  const date = new Date(isoDate);
+const formatDate = (iso: string): DateLabels => {
+  const d = new Date(iso);
   return {
-    en: date.toLocaleDateString("en-US", dateFormatOptions),
-    es: date.toLocaleDateString("es-ES", dateFormatOptions),
+    en: d.toLocaleDateString("en-US", dateOpts).toUpperCase(),
+    es: d.toLocaleDateString("es-ES", dateOpts).toUpperCase(),
   };
 };
 
 const sortArticles = (a: ArticleEntry, b: ArticleEntry) => {
-  if (b.data.priority !== a.data.priority) {
-    return b.data.priority - a.data.priority;
-  }
+  if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
   return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
 };
 
-const groupedSections: SectionGroup[] = sectionEntries
+const enrichArticle = (a: ArticleEntry): EnrichedArticle => ({
+  entry: a,
+  categoryMeta: getCategoryMeta(a.data.category),
+  formattedDate: formatDate(a.data.date),
+});
+
+// All articles sorted by priority
+const allArticles = [...articleEntries].sort(sortArticles).map(enrichArticle);
+
+// Sections grouped by layout
+const groupedSections = sectionEntries
   .sort((a: SectionEntry, b: SectionEntry) => a.data.order - b.data.order)
-  .map((section: SectionEntry): SectionGroup => {
-    const sectionArticles: SectionArticle[] = articleEntries
-      .filter((article: ArticleEntry) => section.data.categories.includes(article.data.category))
+  .map((s: SectionEntry) => ({
+    slug: s.slug,
+    layout: s.data.layout,
+    titleEn: s.data.titleEn,
+    titleEs: s.data.titleEs,
+    descriptionEn: s.data.descriptionEn,
+    descriptionEs: s.data.descriptionEs,
+    articles: articleEntries
+      .filter((a: ArticleEntry) => s.data.categories.includes(a.data.category))
       .sort(sortArticles)
-      .map((article: ArticleEntry) => ({
-        entry: article,
-        categoryMeta: getCategoryMeta(article.data.category),
-        formattedDate: formatDateLabels(article.data.date),
-      }));
+      .map(enrichArticle),
+  }));
 
-    return {
-      slug: section.slug,
-      layout: section.data.layout,
-      titleEn: section.data.titleEn,
-      titleEs: section.data.titleEs,
-      descriptionEn: section.data.descriptionEn,
-      descriptionEs: section.data.descriptionEs,
-      articles: sectionArticles,
-    };
-  });
+const trendingSection = groupedSections.find((s) => s.layout === "grid");
+const trendingArticles = trendingSection?.articles || [];
 
-const heroSection = groupedSections.find((section) => section.layout === "hero");
-const nonHeroSections = groupedSections.filter((section) => section.layout !== "hero");
+// Unique category tabs for trending
+const seenCats = new Set<string>();
+const trendingTabs = trendingArticles
+  .filter((a) => {
+    if (seenCats.has(a.entry.data.category)) return false;
+    seenCats.add(a.entry.data.category);
+    return true;
+  })
+  .map((a) => a.categoryMeta);
 
-const heroArticle = heroSection?.articles[0];
-const heroEntry = heroArticle?.entry;
-const heroCategoryMeta = heroArticle?.categoryMeta;
-const heroDateLabels = heroArticle?.formattedDate;
+// Banner article (first business article)
+const bannerArticle =
+  allArticles.find((a) => a.entry.data.category === "business") || allArticles[2];
+
+// More news: list + sidebar sections
+const listSection = groupedSections.find((s) => s.layout === "list");
+const sidebarSection = groupedSections.find((s) => s.layout === "sidebar");
+const moreListArticles = [
+  ...(listSection?.articles || []),
+  ...(sidebarSection?.articles || []),
+].slice(0, 5);
+const moreFeatureArticle = sidebarSection?.articles[0] || allArticles[3];
+const moreRightArticles = (sidebarSection?.articles || []).slice(1, 3);
 ---
 
 <BaseLayout
@@ -126,362 +120,290 @@ const heroDateLabels = heroArticle?.formattedDate;
   descriptionEn="Your bilingual hub for Brickell's headlines, business, lifestyle, and events."
   descriptionEs="Tu centro bilingüe para titulares, negocios, estilo de vida y eventos de Brickell."
 >
-  {heroSection && heroSection.articles.length > 0 ? (
-    <section
-      id={heroSection.slug}
-      class="grid gap-6 rounded-3xl bg-white/80 p-6 h-[448px]
-      shadow-[0_18px_42px_rgba(10,95,102,0.14)] backdrop-blur"
-    >
-      <div class="flex flex-col gap-8 lg:flex-row h-[400px]">
-        <div class="relative flex-1 overflow-hidden rounded-3xl bg-slate-900/10">
-          <video
-            src="/img/vid-brickell.mp4"
-            class="h-full w-full object-cover"
-            autoplay
-            loop
-            muted
-            playsinline
+
+  <!-- ══════ HERO ══════ -->
+  <div class="container hero-section">
+    <div class="hero-grid">
+
+      <!-- Left: Featured -->
+      {allArticles[0] && (
+        <div class="story-featured">
+          <span class="badge-breaking">
+            <span class="lang lang-en">Breaking News</span>
+            <span class="lang lang-es">Últimas novedades</span>
+          </span>
+          <h1>
+            <span class="lang lang-en">{allArticles[0].entry.data.titleEn}</span>
+            <span class="lang lang-es">{allArticles[0].entry.data.titleEs}</span>
+          </h1>
+          <img
+            src={allArticles[0].entry.data.image}
+            alt={allArticles[0].entry.data.titleEn}
+            style="width:100%;height:200px;border-radius:6px;margin-bottom:12px;object-fit:cover;"
           />
-          <div class="absolute inset-0 bg-linear-to-br from-[#0a5f66]/90 via-[#0a5f66]/40 to-transparent" />
-          <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
-            <div class="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em]">
-              <span class="rounded-full bg-white/20 px-3 py-1">
-                <span class="lang lang-en">{heroCategoryMeta?.titleEn}</span>
-                <span class="lang lang-es">{heroCategoryMeta?.titleEs}</span>
-              </span>
-              <span>
-                <span class="lang lang-en">{heroDateLabels?.en}</span>
-                <span class="lang lang-es">{heroDateLabels?.es}</span>
-              </span>
-            </div>
-            <h2 class="mt-4 text-3xl font-extrabold md:text-4xl">
-              <span class="lang lang-en">{heroEntry?.data.titleEn}</span>
-              <span class="lang lang-es">{heroEntry?.data.titleEs}</span>
-            </h2>
-            <p class="mt-3 text-sm text-white/90">
-              <span class="lang lang-en">{heroEntry?.data.summaryEn}</span>
-              <span class="lang lang-es">{heroEntry?.data.summaryEs}</span>
-            </p>
-            <button class="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-xs font-bold uppercase tracking-[0.28em] text-[#0a5f66] transition hover:bg-[#48d1d1]/20">
-              <span class="lang lang-en">Read story</span>
-              <span class="lang lang-es">Leer historia</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="h-4 w-4"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
-              </svg>
-            </button>
+          <p>
+            <span class="lang lang-en">{allArticles[0].entry.data.summaryEn}</span>
+            <span class="lang lang-es">{allArticles[0].entry.data.summaryEs}</span>
+          </p>
+        </div>
+      )}
+
+      <!-- Center -->
+      {allArticles[1] && (
+        <div class="story-center">
+          <img
+            src={allArticles[1].entry.data.image}
+            alt={allArticles[1].entry.data.titleEn}
+            style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+          />
+          <h3>
+            <span class="lang lang-en">{allArticles[1].entry.data.titleEn}</span>
+            <span class="lang lang-es">{allArticles[1].entry.data.titleEs}</span>
+          </h3>
+          <div class="sub-stories">
+            {allArticles.slice(2, 4).map((article) => (
+              <div class="sub-story">
+                <img
+                  src={article.entry.data.image}
+                  alt={article.entry.data.titleEn}
+                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                />
+                <p>
+                  <span class="lang lang-en">{article.entry.data.titleEn}</span>
+                  <span class="lang lang-es">{article.entry.data.titleEs}</span>
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-    </section>
-  ) : null}
+      )}
 
-  {nonHeroSections
-    .filter((section) => section.layout === "grid")
-    .map((section) => (
-      <section
-        id={section.slug}
-        class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-      >
-        <header class="mb-6 flex items-center justify-between gap-4">
+      <!-- Right -->
+      <div class="story-right">
+        {allArticles[4] && (
+          <div class="top-story">
+            <img
+              src={allArticles[4].entry.data.image}
+              alt={allArticles[4].entry.data.titleEn}
+              style="width:100px;height:70px;border-radius:4px;flex-shrink:0;object-fit:cover;"
+            />
+            <div class="top-story-text">
+              <h4>
+                <span class="lang lang-en">{allArticles[4].entry.data.titleEn}</span>
+                <span class="lang lang-es">{allArticles[4].entry.data.titleEs}</span>
+              </h4>
+              <p>
+                <span class="lang lang-en">{allArticles[4].entry.data.summaryEn}</span>
+                <span class="lang lang-es">{allArticles[4].entry.data.summaryEs}</span>
+              </p>
+            </div>
+          </div>
+        )}
+        <ul class="side-list">
+          {allArticles.slice(5, 8).map((article) => (
+            <li>
+              <span class="lang lang-en">{article.entry.data.titleEn}</span>
+              <span class="lang lang-es">{article.entry.data.titleEs}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════ BANNER ══════ -->
+  {bannerArticle && (
+    <div class="container">
+      <div class="feature-banner">
+        <video class="banner-bg" src="/img/vid-brickell.mp4" autoplay loop muted playsinline></video>
+        <div class="banner-content">
           <div>
-            <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-              <span class="lang lang-en">{section.titleEn}</span>
-              <span class="lang lang-es">{section.titleEs}</span>
-            </h2>
-            {(section.descriptionEn || section.descriptionEs) && (
-              <p class="mt-2 text-sm text-slate-600">
-                <span class="lang lang-en">{section.descriptionEn}</span>
-                <span class="lang lang-es">{section.descriptionEs}</span>
+            <span class="banner-cat">
+              <span class="lang lang-en">{bannerArticle.categoryMeta.titleEn}</span>
+              <span class="lang lang-es">{bannerArticle.categoryMeta.titleEs}</span>
+            </span>
+            <span class="banner-date">
+              <span class="lang lang-en">{bannerArticle.formattedDate.en}</span>
+              <span class="lang lang-es">{bannerArticle.formattedDate.es}</span>
+            </span>
+          </div>
+          <h2>
+            <span class="lang lang-en">{bannerArticle.entry.data.titleEn}</span>
+            <span class="lang lang-es">{bannerArticle.entry.data.titleEs}</span>
+          </h2>
+          <p>
+            <span class="lang lang-en">{bannerArticle.entry.data.summaryEn}</span>
+            <span class="lang lang-es">{bannerArticle.entry.data.summaryEs}</span>
+          </p>
+          <a href="#" class="btn-read">
+            <span class="lang lang-en">Read Story &#9658;</span>
+            <span class="lang lang-es">Leer Historia &#9658;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  )}
+
+  <!-- ══════ MORE NEWS ══════ -->
+  <div class="container more-section">
+    <h2 class="section-title">
+      <span class="lang lang-en">More News</span>
+      <span class="lang lang-es">Más noticias</span>
+    </h2>
+    <div class="more-grid">
+
+      <!-- Left list -->
+      <div class="more-list">
+        {moreListArticles.map((article) => (
+          <div class="more-list-item">
+            <img
+              src={article.entry.data.image}
+              alt={article.entry.data.titleEn}
+              style="width:60px;height:48px;border-radius:4px;flex-shrink:0;object-fit:cover;"
+            />
+            <p>
+              <span class="lang lang-en">{article.entry.data.titleEn}</span>
+              <span class="lang lang-es">{article.entry.data.titleEs}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <!-- Center feature -->
+      {moreFeatureArticle && (
+        <div class="more-feature">
+          <img
+            src={moreFeatureArticle.entry.data.image}
+            alt={moreFeatureArticle.entry.data.titleEn}
+            style="width:100%;height:200px;border-radius:8px;margin-bottom:14px;object-fit:cover;"
+          />
+          <h3>
+            <span class="lang lang-en">{moreFeatureArticle.entry.data.titleEn}</span>
+            <span class="lang lang-es">{moreFeatureArticle.entry.data.titleEs}</span>
+          </h3>
+          <p>
+            <span class="lang lang-en">{moreFeatureArticle.entry.data.summaryEn}</span>
+            <span class="lang lang-es">{moreFeatureArticle.entry.data.summaryEs}</span>
+          </p>
+        </div>
+      )}
+
+      <!-- Right -->
+      <div class="more-right">
+        {moreRightArticles.map((article, i) => (
+          <div class="more-right-item" style={i > 0 ? "padding-top:14px;" : ""}>
+            {i === 0 && (
+              <img
+                src={article.entry.data.image}
+                alt={article.entry.data.titleEn}
+                style="width:100%;height:70px;border-radius:4px;margin-bottom:8px;object-fit:cover;"
+              />
+            )}
+            <h4>
+              <span class="lang lang-en">{article.entry.data.titleEn}</span>
+              <span class="lang lang-es">{article.entry.data.titleEs}</span>
+            </h4>
+            {i === 0 && (
+              <p>
+                <span class="lang lang-en">{article.entry.data.summaryEn}</span>
+                <span class="lang lang-es">{article.entry.data.summaryEs}</span>
               </p>
             )}
           </div>
-          <div class="hidden gap-2 md:flex">
-            {section.articles.slice(0, 4).map(({ categoryMeta }) => (
-              <span
-                class="rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]"
-                style={{ backgroundColor: `${categoryMeta.accentColor}1A` }}
-              >
-                <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                <span class="lang lang-es">{categoryMeta.titleEs}</span>
-              </span>
-            ))}
-          </div>
-        </header>
-        <div class="splide" data-carousel={section.slug}>
-          <div class="splide__track">
-            <ul class="splide__list">
-              {section.articles.map(({ entry, categoryMeta, formattedDate }) => (
-                <li class="splide__slide">
-                  <article class="group flex h-full flex-col overflow-hidden rounded-3xl border border-white/50 bg-white/70 transition hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(10,95,102,0.16)]">
-                    <div class="relative h-44 overflow-hidden">
-                      <img src={entry.data.image} alt={entry.data.titleEn} class="h-full w-full object-cover" loading="lazy" />
-                      <span class="absolute left-4 top-4 rounded-full bg-[#0a5f66]/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-white">
-                        <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                        <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                      </span>
-                    </div>
-                    <div class="flex flex-1 flex-col gap-3 p-5">
-                      <h3 class="text-xl font-bold text-[#0a5f66]">
-                        <span class="lang lang-en">{entry.data.titleEn}</span>
-                        <span class="lang lang-es">{entry.data.titleEs}</span>
-                      </h3>
-                      <p class="text-sm text-slate-600 flex-1">
-                        <span class="lang lang-en">{entry.data.summaryEn}</span>
-                        <span class="lang lang-es">{entry.data.summaryEs}</span>
-                      </p>
-                      <div class="flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
-                        <span>{entry.data.author}</span>
-                        <span>
-                          <span class="lang lang-en">{formattedDate.en}</span>
-                          <span class="lang lang-es">{formattedDate.es}</span>
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-    ))}
+        ))}
+      </div>
 
-  <section class="grid gap-8 lg:grid-cols-[2fr_1fr]">
-    <div class="space-y-8">
-      {nonHeroSections
-        .filter((section) => section.layout === "list")
-        .map((section) => (
-          <section
-            id={section.slug}
-            class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-          >
-            <header class="mb-4">
-              <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-                <span class="lang lang-en">{section.titleEn}</span>
-                <span class="lang lang-es">{section.titleEs}</span>
-              </h2>
-              {(section.descriptionEn || section.descriptionEs) && (
-                <p class="mt-2 text-sm text-slate-600">
-                  <span class="lang lang-en">{section.descriptionEn}</span>
-                  <span class="lang lang-es">{section.descriptionEs}</span>
-                </p>
-              )}
-            </header>
-            <div class="space-y-4">
-              {section.articles.slice(0, 4).map(({ entry, categoryMeta, formattedDate }) => (
-                <article class="flex flex-col gap-3 rounded-2xl border border-[#48d1d1]/30 bg-[#48d1d1]/10 p-4 transition hover:bg-[#48d1d1]/20 md:flex-row md:items-center">
-                  <img
-                    src={entry.data.image}
-                    alt={entry.data.titleEn}
-                    class="h-20 w-28 rounded-xl object-cover"
-                    loading="lazy"
-                  />
-                  <div class="flex-1">
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]">
-                      <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                      <span class="lang lang-es">{categoryMeta.titleEs}</span>
-                    </p>
-                    <h3 class="mt-1 text-lg font-bold text-[#0a5f66]">
-                      <span class="lang lang-en">{entry.data.titleEn}</span>
-                      <span class="lang lang-es">{entry.data.titleEs}</span>
-                    </h3>
-                    <p class="mt-1 text-sm text-slate-600">
-                      <span class="lang lang-en">{entry.data.summaryEn}</span>
-                      <span class="lang lang-es">{entry.data.summaryEs}</span>
-                    </p>
-                  </div>
-                  <div class="flex flex-col items-end gap-1 text-xs uppercase tracking-[0.28em] text-slate-500">
-                    <span>{entry.data.author}</span>
-                    <span>
-                      <span class="lang lang-en">{formattedDate.en}</span>
-                      <span class="lang lang-es">{formattedDate.es}</span>
+    </div>
+  </div>
+
+  <!-- ══════ TRENDING CAROUSEL ══════ -->
+  <div class="trending-section">
+    <div class="container">
+      <div class="trending-header">
+        <div>
+          <p class="trending-label">
+            <span class="lang lang-en">{trendingSection?.titleEn || "Trending Developments"}</span>
+            <span class="lang lang-es">{trendingSection?.titleEs || "Desarrollos en Tendencia"}</span>
+          </p>
+          <p class="trending-subtitle">
+            <span class="lang lang-en">{trendingSection?.descriptionEn || "The projects and deals shaping Brickell's skyline."}</span>
+            <span class="lang lang-es">{trendingSection?.descriptionEs || "Los proyectos y acuerdos que moldean el horizonte de Brickell."}</span>
+          </p>
+        </div>
+        <div class="trending-tabs">
+          {trendingTabs.map((tab, i) => (
+            <span class={`tab${i === 0 ? " active" : ""}`}>
+              <span class="lang lang-en">{tab.titleEn}</span>
+              <span class="lang lang-es">{tab.titleEs}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div class="splide" id="trendingSlider">
+        <div class="splide__track">
+          <ul class="splide__list">
+            {trendingArticles.map((article) => (
+              <li class="splide__slide">
+                <div class="trend-card">
+                  <div class="trend-card-img">
+                    <img
+                      src={article.entry.data.image}
+                      alt={article.entry.data.titleEn}
+                      loading="lazy"
+                    />
+                    <span class="card-badge">
+                      <span class="lang lang-en">{article.categoryMeta.titleEn}</span>
+                      <span class="lang lang-es">{article.categoryMeta.titleEs}</span>
                     </span>
                   </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
-
-      <section class="grid gap-6 rounded-3xl border border-dashed border-white/50 bg-white/60 p-6 text-center text-slate-500">
-        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#0a5f66]">
-          <span class="lang lang-en">Advertisement</span>
-          <span class="lang lang-es">Publicidad</span>
-        </p>
-        <p class="text-sm text-slate-500">
-          <span class="lang lang-en">Feature a local business or community event here.</span>
-          <span class="lang lang-es">Destaca un negocio local o evento comunitario aquí.</span>
-        </p>
-      </section>
-    </div>
-
-    <div class="space-y-8">
-      {nonHeroSections
-        .filter((section) => section.layout === "sidebar")
-        .map((section) => (
-          <aside
-            id={section.slug}
-            class="rounded-3xl bg-white/80 p-6 shadow-[0_12px_32px_rgba(10,95,102,0.12)] backdrop-blur"
-          >
-            <header class="mb-4">
-              <h2 class="text-sm font-bold uppercase tracking-[0.28em] text-[#0a5f66]">
-                <span class="lang lang-en">{section.titleEn}</span>
-                <span class="lang lang-es">{section.titleEs}</span>
-              </h2>
-              {(section.descriptionEn || section.descriptionEs) && (
-                <p class="mt-2 text-sm text-slate-600">
-                  <span class="lang lang-en">{section.descriptionEn}</span>
-                  <span class="lang lang-es">{section.descriptionEs}</span>
-                </p>
-              )}
-            </header>
-            <div class="space-y-6">
-              {section.articles.slice(0, 4).map(({ entry, categoryMeta, formattedDate }) => (
-                <article class="flex flex-col gap-3 rounded-2xl border border-[#48d1d1]/20 bg-[#48d1d1]/5 p-4">
-                  <img
-                    src={entry.data.image}
-                    alt={entry.data.titleEn}
-                    class="h-40 w-full rounded-2xl object-cover"
-                    loading="lazy"
-                  />
-                  <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0a5f66]">
-                      <span class="lang lang-en">{categoryMeta.titleEn}</span>
-                      <span class="lang lang-es">{categoryMeta.titleEs}</span>
+                  <div class="trend-card-body">
+                    <h4>
+                      <span class="lang lang-en">{article.entry.data.titleEn}</span>
+                      <span class="lang lang-es">{article.entry.data.titleEs}</span>
+                    </h4>
+                    <p>
+                      <span class="lang lang-en">{article.entry.data.summaryEn}</span>
+                      <span class="lang lang-es">{article.entry.data.summaryEs}</span>
                     </p>
-                    <h3 class="mt-2 text-lg font-bold text-[#0a5f66]">
-                      <span class="lang lang-en">{entry.data.titleEn}</span>
-                      <span class="lang lang-es">{entry.data.titleEs}</span>
-                    </h3>
-                    <p class="mt-1 text-sm text-slate-600">
-                      <span class="lang lang-en">{entry.data.summaryEn}</span>
-                      <span class="lang lang-es">{entry.data.summaryEs}</span>
-                    </p>
-                    <div class="mt-3 flex items-center justify-between text-xs uppercase tracking-[0.28em] text-slate-500">
-                      <span>{entry.data.author}</span>
-                      <span>
-                        <span class="lang lang-en">{formattedDate.en}</span>
-                        <span class="lang lang-es">{formattedDate.es}</span>
-                      </span>
-                    </div>
                   </div>
-                </article>
-              ))}
-            </div>
-          </aside>
-        ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
-  </section>
-</BaseLayout>
+  </div>
 
-<script>
-  import Splide from '@splidejs/splide';
+  <script>
+    import Splide from '@splidejs/splide';
+    import '@splidejs/splide/css';
 
-  console.log('Script loaded, Splide:', Splide);
-
-  const initCarousels = () => {
-    console.log('Initializing carousels...');
-    const carousels = document.querySelectorAll('.splide');
-    console.log('Found carousels:', carousels.length);
-
-    carousels.forEach((carousel, index) => {
-      console.log(`Initializing carousel ${index}:`, carousel);
-
-      try {
-        const splide = new Splide(carousel as HTMLElement, {
-          type: 'loop',
-          perPage: 3,
-          perMove: 1,
-          gap: '1.5rem',
-          arrows: true,
-          pagination: false,
-          breakpoints: {
-            1280: {
-              perPage: 4,
-            },
-            1024: {
-              perPage: 3,
-            },
-            768: {
-              perPage: 2,
-            },
-            640: {
-              perPage: 1,
-            },
-          },
-        });
-
-        splide.mount();
-        console.log(`Carousel ${index} mounted successfully`);
-      } catch (error) {
-        console.error(`Error mounting carousel ${index}:`, error);
-      }
+    const slider = new Splide('#trendingSlider', {
+      type: 'loop',
+      perPage: 3,
+      perMove: 3,
+      gap: '20px',
+      pagination: true,
+      arrows: true,
+      breakpoints: {
+        768: { perPage: 1 },
+      },
     });
-  };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initCarousels);
-  } else {
-    initCarousels();
-  }
-</script>
+    slider.mount();
 
-<style is:global>
-  .splide {
-    padding: 0 3rem;
-  }
+    // Tab toggle
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        slider.go(0);
+      });
+    });
+  </script>
 
-  .splide__track {
-    overflow: hidden;
-  }
-
-  .splide__list {
-    display: flex;
-    align-items: stretch;
-  }
-
-  .splide__slide {
-    display: flex;
-    flex-shrink: 0;
-  }
-
-  .splide__arrow {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 9999px;
-    background-color: #0a5f66;
-    padding: 0.75rem;
-    color: white;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    transition: all 0.2s;
-  }
-
-  .splide__arrow:hover {
-    background-color: #48d1d1;
-  }
-
-  .splide__arrow:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(72, 209, 209, 0.5);
-  }
-
-  .splide__arrow--prev {
-    left: 0;
-  }
-
-  .splide__arrow--next {
-    right: 0;
-  }
-
-  .splide__arrow svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-</style>
+</BaseLayout>
