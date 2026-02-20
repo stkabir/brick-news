@@ -7,7 +7,6 @@ layout: grid
 categories:
   - business
   - real-estate
-  - news
 order: 2
 ---
 Showcase market-shaping stories with a bold card grid.

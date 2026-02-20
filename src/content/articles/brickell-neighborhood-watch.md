@@ -1,0 +1,12 @@
+---
+titleEn: "Brickell Neighborhood Watch App Reaches 5,000 Users"
+titleEs: "La App de Vigilancia Vecinal de Brickell Alcanza 5,000 Usuarios"
+summaryEn: "The community safety platform reports a 30% drop in package theft since its launch six months ago."
+summaryEs: "La plataforma de seguridad comunitaria reporta una caída del 30% en robo de paquetes desde su lanzamiento hace seis meses."
+image: "https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1600&q=80"
+category: home
+author: "Natalie Chen"
+date: "2026-02-10"
+featured: false
+priority: 5
+---
