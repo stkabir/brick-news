@@ -20,6 +20,20 @@ const {
   descriptionEn = "Your local source for Brickell news.",
   descriptionEs = "Tu fuente local de noticias de Brickell.",
 } = Astro.props;
+
+const now = new Date();
+const dateEn = now.toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
+const dateEs = now.toLocaleDateString("es-ES", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 ---
 <html lang="en" data-locale="en">
   <head>
@@ -80,7 +94,7 @@ const {
           </h3>
           <p>
             <span class="lang lang-en">Weekly highlights delivered in English and Spanish.</span>
-            <span class="lang lang-es">Destacados semanales entregados en inglés y español.</span>
+            <span class="lang lang-es">Destacados semanales en inglés y español.</span>
           </p>
         </div>
         <div class="newsletter-form">
@@ -110,6 +124,7 @@ const {
         <span class="lang lang-es">&copy; {new Date().getFullYear()} Noticias Brickell</span>
       </div>
     </footer>
+
 
     <script is:inline>
       const storageKey = "brickell-news-locale";

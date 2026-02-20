@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+@theme {
+  --color-paper: #faf7f2;
+  --color-paper-warm: #f0ebe2;
+  --color-ink: #1a1a1a;
+  --color-ink-light: #4a4a4a;
+  --color-ink-faded: #8a8580;
+  --color-rule: #2a2a2a;
+  --color-rule-light: #cec9c0;
+  --color-accent: #8b0000;
+
+  --font-masthead: "DM Serif Display", Georgia, serif;
+  --font-headline: "Playfair Display", Georgia, serif;
+  --font-article: "Source Serif 4", Georgia, serif;
+  --font-label: "Libre Franklin", "Helvetica Neue", sans-serif;
+}
+
 /* ——— Language toggle system ——— */
 [data-locale='en'] .lang-en,
 [data-locale='es'] .lang-es {
