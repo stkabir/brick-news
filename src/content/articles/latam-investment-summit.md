@@ -1,0 +1,12 @@
+---
+titleEn: "LatAm Investment Summit Draws Record Attendance to Brickell"
+titleEs: "La Cumbre de Inversión LatAm Atrae Asistencia Récord a Brickell"
+summaryEn: "Over 2,000 investors from 14 countries gather to discuss real estate, crypto, and cross-border commerce."
+summaryEs: "Más de 2,000 inversionistas de 14 países se reúnen para discutir bienes raíces, cripto y comercio transfronterizo."
+image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80"
+category: business
+author: "Elena Brooks"
+date: "2026-02-14"
+featured: false
+priority: 8
+---

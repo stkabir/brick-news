@@ -109,9 +109,9 @@ const sidebarSection = groupedSections.find((s) => s.layout === "sidebar");
 const moreListArticles = [
   ...(listSection?.articles || []),
   ...(sidebarSection?.articles || []),
-].slice(0, 5);
+].slice(0, 8);
 const moreFeatureArticle = sidebarSection?.articles[0] || allArticles[3];
-const moreRightArticles = (sidebarSection?.articles || []).slice(1, 3);
+const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
 ---
 
 <BaseLayout
@@ -180,27 +180,27 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(1, 3);
 
       <!-- Right -->
       <div class="story-right">
-        {allArticles[4] && (
+        {allArticles.slice(4, 6).map((article) => (
           <div class="top-story">
             <img
-              src={allArticles[4].entry.data.image}
-              alt={allArticles[4].entry.data.titleEn}
+              src={article.entry.data.image}
+              alt={article.entry.data.titleEn}
               style="width:100px;height:70px;border-radius:4px;flex-shrink:0;object-fit:cover;"
             />
             <div class="top-story-text">
               <h4>
-                <span class="lang lang-en">{allArticles[4].entry.data.titleEn}</span>
-                <span class="lang lang-es">{allArticles[4].entry.data.titleEs}</span>
+                <span class="lang lang-en">{article.entry.data.titleEn}</span>
+                <span class="lang lang-es">{article.entry.data.titleEs}</span>
               </h4>
               <p>
-                <span class="lang lang-en">{allArticles[4].entry.data.summaryEn}</span>
-                <span class="lang lang-es">{allArticles[4].entry.data.summaryEs}</span>
+                <span class="lang lang-en">{article.entry.data.summaryEn}</span>
+                <span class="lang lang-es">{article.entry.data.summaryEs}</span>
               </p>
             </div>
           </div>
-        )}
+        ))}
         <ul class="side-list">
-          {allArticles.slice(5, 8).map((article) => (
+          {allArticles.slice(6, 10).map((article) => (
             <li>
               <span class="lang lang-en">{article.entry.data.titleEn}</span>
               <span class="lang lang-es">{article.entry.data.titleEs}</span>

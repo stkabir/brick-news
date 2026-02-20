@@ -1,0 +1,12 @@
+---
+titleEn: "Water Main Break Disrupts Service on SE 1st Street"
+titleEs: "Rotura de Tubería Principal Interrumpe Servicio en SE 1st Street"
+summaryEn: "Crews work overnight to restore supply to four residential towers and a dozen storefronts."
+summaryEs: "Las cuadrillas trabajan toda la noche para restaurar el suministro a cuatro torres residenciales y una docena de locales."
+image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1600&q=80"
+category: news
+author: "Camila Torres"
+date: "2026-02-19"
+featured: false
+priority: 7
+---

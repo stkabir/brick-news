@@ -1,0 +1,12 @@
+---
+titleEn: "New Sunday Farmers Market Launches Under the Metrorail"
+titleEs: "Nuevo Mercado Dominical de Productores Debuta Bajo el Metrorail"
+summaryEn: "Local growers and artisan food makers set up weekly stalls with organic produce and ready-to-eat bites."
+summaryEs: "Productores locales y artesanos gastronómicos instalan puestos semanales con productos orgánicos y bocados listos para comer."
+image: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?auto=format&fit=crop&w=1600&q=80"
+category: events
+author: "Priya Patel"
+date: "2026-02-05"
+featured: false
+priority: 5
+---

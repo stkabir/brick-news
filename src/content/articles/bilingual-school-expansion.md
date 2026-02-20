@@ -1,0 +1,12 @@
+---
+titleEn: "Brickell's First Bilingual Charter School Announces Expansion"
+titleEs: "La Primera Escuela Charter Bilingüe de Brickell Anuncia Expansión"
+summaryEn: "Enrollment doubles as the K-8 academy adds a STEM wing and dual-language immersion track."
+summaryEs: "La matrícula se duplica mientras la academia K-8 añade un ala STEM y un programa de inmersión bilingüe."
+image: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1600&q=80"
+category: news
+author: "Natalie Chen"
+date: "2026-02-06"
+featured: false
+priority: 6
+---
