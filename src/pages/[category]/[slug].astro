@@ -1,0 +1,201 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type CategoryEntry = CollectionEntry<"categories">;
+type ArticleEntry = CollectionEntry<"articles">;
+type NavLink = { slug: string; titleEn: string; titleEs: string };
+type DateLabels = { en: string; es: string };
+
+const categoryEntries = await getCollection("categories");
+
+const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
+  slug: c.id,
+  titleEn: c.data.titleEn,
+  titleEs: c.data.titleEs,
+}));
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles");
+  const categories = await getCollection("categories");
+  const catMap = new Map(categories.map((c) => [c.id, c.data]));
+
+  return articles.map((article) => ({
+    params: { category: article.data.category, slug: article.id },
+    props: {
+      article,
+      categoryData: catMap.get(article.data.category),
+      relatedArticles: articles
+        .filter((a) => a.data.category === article.data.category && a.id !== article.id)
+        .sort((a, b) => {
+          if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
+          return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+        }),
+    },
+  }));
+}
+
+const { article, categoryData, relatedArticles } = Astro.props as {
+  article: ArticleEntry;
+  categoryData: { titleEn: string; titleEs: string } | undefined;
+  relatedArticles: ArticleEntry[];
+};
+
+const dateOpts: Intl.DateTimeFormatOptions = { weekday: "long", month: "long", day: "numeric", year: "numeric" };
+
+const formatDate = (iso: string): DateLabels => {
+  const d = new Date(iso);
+  return {
+    en: d.toLocaleDateString("en-US", dateOpts),
+    es: d.toLocaleDateString("es-ES", dateOpts),
+  };
+};
+
+const shortDateOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+const formatShortDate = (iso: string): DateLabels => {
+  const d = new Date(iso);
+  return {
+    en: d.toLocaleDateString("en-US", shortDateOpts).toUpperCase(),
+    es: d.toLocaleDateString("es-ES", shortDateOpts).toUpperCase(),
+  };
+};
+
+const latestRelated = relatedArticles.slice(0, 2);
+const moreRelated = relatedArticles.slice(2, 8);
+const catSlug = article.data.category;
+const catEn = categoryData?.titleEn ?? catSlug;
+const catEs = categoryData?.titleEs ?? catSlug;
+---
+
+<BaseLayout
+  navLinks={navLinks}
+  pageTitle={`${article.data.titleEn} | Brickell News`}
+  descriptionEn={article.data.summaryEn}
+  descriptionEs={article.data.summaryEs}
+>
+
+  <div class="container art-page">
+
+    <!-- Breadcrumb -->
+    <nav class="art-breadcrumb">
+      <a href="/">
+        <span class="lang lang-en">Home</span>
+        <span class="lang lang-es">Inicio</span>
+      </a>
+      <span class="art-breadcrumb-sep">/</span>
+      <a href={`/${catSlug}`}>
+        <span class="lang lang-en">{catEn}</span>
+        <span class="lang lang-es">{catEs}</span>
+      </a>
+    </nav>
+
+    <!-- Main Article -->
+    <article class="art-main">
+      <div class="art-meta">
+        <span class="art-category-badge">
+          <span class="lang lang-en">{catEn}</span>
+          <span class="lang lang-es">{catEs}</span>
+        </span>
+        <span class="art-date">
+          <span class="lang lang-en">{formatDate(article.data.date).en}</span>
+          <span class="lang lang-es">{formatDate(article.data.date).es}</span>
+        </span>
+      </div>
+
+      <h1 class="art-title">
+        <span class="lang lang-en">{article.data.titleEn}</span>
+        <span class="lang lang-es">{article.data.titleEs}</span>
+      </h1>
+
+      <div class="art-author-line">
+        <span class="art-author">{article.data.author}</span>
+      </div>
+
+      <div class="art-hero-img">
+        <img src={article.data.image} alt={article.data.titleEn} />
+      </div>
+
+      <div class="art-body">
+        <p>
+          <span class="lang lang-en">{article.data.summaryEn}</span>
+          <span class="lang lang-es">{article.data.summaryEs}</span>
+        </p>
+      </div>
+    </article>
+
+    <!-- Latest from same category -->
+    {latestRelated.length > 0 && (
+      <section class="art-related">
+        <h2 class="section-title">
+          <span class="lang lang-en">Latest in {catEn}</span>
+          <span class="lang lang-es">Últimas en {catEs}</span>
+        </h2>
+        <div class="art-related-grid">
+          {latestRelated.map((rel) => (
+            <a href={`/${catSlug}/${rel.id}`} class="art-related-card">
+              <div class="art-related-img">
+                <img src={rel.data.image} alt={rel.data.titleEn} loading="lazy" />
+              </div>
+              <div class="art-related-body">
+                <span class="art-related-date">
+                  <span class="lang lang-en">{formatShortDate(rel.data.date).en}</span>
+                  <span class="lang lang-es">{formatShortDate(rel.data.date).es}</span>
+                </span>
+                <h3>
+                  <span class="lang lang-en">{rel.data.titleEn}</span>
+                  <span class="lang lang-es">{rel.data.titleEs}</span>
+                </h3>
+                <p>
+                  <span class="lang lang-en">{rel.data.summaryEn}</span>
+                  <span class="lang lang-es">{rel.data.summaryEs}</span>
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- More from same category -->
+    {moreRelated.length > 0 && (
+      <section class="art-more">
+        <h2 class="section-title">
+          <span class="lang lang-en">More from {catEn}</span>
+          <span class="lang lang-es">Más de {catEs}</span>
+        </h2>
+        <div class="cat-grid">
+          {moreRelated.map((rel) => (
+            <a href={`/${catSlug}/${rel.id}`} class="cat-card">
+              <div class="cat-card-img">
+                <img src={rel.data.image} alt={rel.data.titleEn} loading="lazy" />
+              </div>
+              <div class="cat-card-body">
+                <span class="cat-card-date">
+                  <span class="lang lang-en">{formatShortDate(rel.data.date).en}</span>
+                  <span class="lang lang-es">{formatShortDate(rel.data.date).es}</span>
+                </span>
+                <h3>
+                  <span class="lang lang-en">{rel.data.titleEn}</span>
+                  <span class="lang lang-es">{rel.data.titleEs}</span>
+                </h3>
+                <p>
+                  <span class="lang lang-en">{rel.data.summaryEn}</span>
+                  <span class="lang lang-es">{rel.data.summaryEs}</span>
+                </p>
+                <span class="cat-card-author">{rel.data.author}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+        <div class="art-more-link">
+          <a href={`/${catSlug}`}>
+            <span class="lang lang-en">View all {catEn} articles &rarr;</span>
+            <span class="lang lang-es">Ver todos los artículos de {catEs} &rarr;</span>
+          </a>
+        </div>
+      </section>
+    )}
+
+  </div>
+
+</BaseLayout>

@@ -1,0 +1,9 @@
+titleEn: Trending Developments
+titleEs: Desarrollos en Tendencia
+descriptionEn: "The projects and deals shaping Brickell's skyline."
+descriptionEs: "Los proyectos y acuerdos que moldean el horizonte de Brickell."
+sectionLayout: grid
+categories:
+  - business
+  - real-estate
+order: 2

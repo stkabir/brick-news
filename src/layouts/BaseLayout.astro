@@ -54,17 +54,17 @@ const dateEs = now.toLocaleDateString("es-ES", {
   <body>
     <header>
       <div class="header-inner">
-        <a href="#" class="logo-wrap">
+        <a href="/" class="logo-wrap">
           <img src="/img/logo.jpeg" alt="Brickell News" class="logo-img" />
         </a>
 
         <nav>
-          <a href="#">
+          <a href="/">
             <span class="lang lang-en">Home</span>
             <span class="lang lang-es">Inicio</span>
           </a>
           {navLinks.filter(l => l.slug !== 'home').map(link => (
-            <a href={`#${link.slug}`}>
+            <a href={`/${link.slug}`}>
               <span class="lang lang-en">{link.titleEn}</span>
               <span class="lang lang-es">{link.titleEs}</span>
             </a>
@@ -72,7 +72,8 @@ const dateEs = now.toLocaleDateString("es-ES", {
         </nav>
 
         <div class="header-right">
-          <input type="text" class="search-box" id="searchBox" placeholder="Search Brickell…" />
+          <input type="text" class="search-box" id="searchBox" placeholder="Search Brickell…" autocomplete="off" />
+          <div class="search-dropdown" id="searchDropdown"></div>
           <button class="btn-lang" data-lang-toggle>
             <span class="lang lang-en">ES</span>
             <span class="lang lang-es">EN</span>
@@ -149,6 +150,86 @@ const dateEs = now.toLocaleDateString("es-ES", {
         setLocale(next);
         localStorage.setItem(storageKey, next);
       });
+
+      // ——— Search ———
+      const searchInput = document.getElementById('searchBox');
+      const dropdown = document.getElementById('searchDropdown');
+      let articles = null;
+      let debounceTimer = null;
+
+      async function loadArticles() {
+        if (articles) return articles;
+        const res = await fetch('/api/search.json');
+        articles = await res.json();
+        return articles;
+      }
+
+      function getLocale() {
+        return root.dataset.locale || 'en';
+      }
+
+      function searchArticles(query, data) {
+        const q = query.toLowerCase().trim();
+        if (!q) return [];
+        return data.filter(function(a) {
+          return a.titleEn.toLowerCase().includes(q)
+            || a.titleEs.toLowerCase().includes(q)
+            || a.summaryEn.toLowerCase().includes(q)
+            || a.summaryEs.toLowerCase().includes(q)
+            || a.author.toLowerCase().includes(q);
+        }).slice(0, 6);
+      }
+
+      function renderResults(results) {
+        const locale = getLocale();
+        const isEn = locale === 'en';
+
+        if (results.length === 0) {
+          dropdown.innerHTML = '<div class="search-empty">' + (isEn ? 'No results found' : 'Sin resultados') + '</div>';
+          dropdown.classList.add('active');
+          return;
+        }
+
+        dropdown.innerHTML = results.map(function(a) {
+          var title = isEn ? a.titleEn : a.titleEs;
+          var cat = isEn ? a.categoryEn : a.categoryEs;
+          return '<a class="search-dropdown-item" href="/' + a.category + '/' + a.id + '">'
+            + '<img src="' + a.image + '&w=120&h=90" alt="" />'
+            + '<div class="search-dropdown-info">'
+            + '<h4>' + title + '</h4>'
+            + '<div class="search-dropdown-meta">'
+            + '<span class="search-dropdown-cat">' + cat + '</span>'
+            + '<span class="search-dropdown-author">' + a.author + '</span>'
+            + '</div></div></a>';
+        }).join('');
+        dropdown.classList.add('active');
+      }
+
+      function hideDropdown() {
+        dropdown.classList.remove('active');
+        dropdown.innerHTML = '';
+      }
+
+      if (searchInput && dropdown) {
+        searchInput.addEventListener('input', function() {
+          clearTimeout(debounceTimer);
+          var val = searchInput.value;
+          if (!val.trim()) { hideDropdown(); return; }
+          debounceTimer = setTimeout(async function() {
+            var data = await loadArticles();
+            var results = searchArticles(val, data);
+            renderResults(results);
+          }, 250);
+        });
+
+        searchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') { hideDropdown(); searchInput.blur(); }
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!e.target.closest('.header-right')) hideDropdown();
+        });
+      }
     </script>
   </body>
 </html>

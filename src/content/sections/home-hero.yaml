@@ -1,0 +1,8 @@
+titleEn: Headline Spotlight
+titleEs: Titular Destacado
+descriptionEn: "Stay current with the biggest story in Brickell."
+descriptionEs: "Mantente al día con la historia más importante de Brickell."
+sectionLayout: hero
+categories:
+  - headline-news
+order: 1
