@@ -1,0 +1,9 @@
+titleEn: Latest Updates
+titleEs: Últimas Actualizaciones
+descriptionEn: "Quick briefs on what's happening now."
+descriptionEs: "Resumen rápido de lo que está sucediendo ahora."
+sectionLayout: list
+categories:
+  - news
+  - home
+order: 3

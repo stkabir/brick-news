@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+type CategoryEntry = CollectionEntry<"categories">;
+type ArticleEntry = CollectionEntry<"articles">;
+
+type NavLink = { slug: string; titleEn: string; titleEs: string };
+type DateLabels = { en: string; es: string };
+
+const categoryEntries = await getCollection("categories");
+
+const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
+  slug: c.id,
+  titleEn: c.data.titleEn,
+  titleEs: c.data.titleEs,
+}));
+
+export async function getStaticPaths() {
+  const categories = await getCollection("categories");
+  const articles = await getCollection("articles");
+
+  return categories.map((cat) => ({
+    params: { category: cat.id },
+    props: {
+      category: cat,
+      articles: articles
+        .filter((a) => a.data.category === cat.id)
+        .sort((a, b) => {
+          if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
+          return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+        }),
+    },
+  }));
+}
+
+const { category, articles } = Astro.props as {
+  category: CategoryEntry;
+  articles: ArticleEntry[];
+};
+
+const dateOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
+
+const formatDate = (iso: string): DateLabels => {
+  const d = new Date(iso);
+  return {
+    en: d.toLocaleDateString("en-US", dateOpts).toUpperCase(),
+    es: d.toLocaleDateString("es-ES", dateOpts).toUpperCase(),
+  };
+};
+
+const featured = articles[0];
+const rest = articles.slice(1);
+---
+
+<BaseLayout
+  navLinks={navLinks}
+  pageTitle={`${category.data.titleEn} | Brickell News`}
+  descriptionEn={`Latest ${category.data.titleEn} news from Brickell.`}
+  descriptionEs={`Últimas noticias de ${category.data.titleEs} en Brickell.`}
+>
+
+  <div class="container cat-page">
+
+    <!-- Category Header -->
+    <div class="cat-header">
+      <h1 class="cat-title">
+        <span class="lang lang-en">{category.data.titleEn}</span>
+        <span class="lang lang-es">{category.data.titleEs}</span>
+      </h1>
+      <p class="cat-count">
+        <span class="lang lang-en">{articles.length} {articles.length === 1 ? 'article' : 'articles'}</span>
+        <span class="lang lang-es">{articles.length} {articles.length === 1 ? 'artículo' : 'artículos'}</span>
+      </p>
+    </div>
+
+    <!-- Featured Article -->
+    {featured && (
+      <a href={`/${category.id}/${featured.id}`} class="cat-featured">
+        <div class="cat-featured-img">
+          <img src={featured.data.image} alt={featured.data.titleEn} />
+        </div>
+        <div class="cat-featured-body">
+          <span class="cat-featured-date">
+            <span class="lang lang-en">{formatDate(featured.data.date).en}</span>
+            <span class="lang lang-es">{formatDate(featured.data.date).es}</span>
+          </span>
+          <h2>
+            <span class="lang lang-en">{featured.data.titleEn}</span>
+            <span class="lang lang-es">{featured.data.titleEs}</span>
+          </h2>
+          <p>
+            <span class="lang lang-en">{featured.data.summaryEn}</span>
+            <span class="lang lang-es">{featured.data.summaryEs}</span>
+          </p>
+          <span class="cat-featured-author">{featured.data.author}</span>
+        </div>
+      </a>
+    )}
+
+    <!-- Article Grid -->
+    {rest.length > 0 && (
+      <div class="cat-grid">
+        {rest.map((article) => (
+          <a href={`/${category.id}/${article.id}`} class="cat-card">
+            <div class="cat-card-img">
+              <img src={article.data.image} alt={article.data.titleEn} loading="lazy" />
+            </div>
+            <div class="cat-card-body">
+              <span class="cat-card-date">
+                <span class="lang lang-en">{formatDate(article.data.date).en}</span>
+                <span class="lang lang-es">{formatDate(article.data.date).es}</span>
+              </span>
+              <h3>
+                <span class="lang lang-en">{article.data.titleEn}</span>
+                <span class="lang lang-es">{article.data.titleEs}</span>
+              </h3>
+              <p>
+                <span class="lang lang-en">{article.data.summaryEn}</span>
+                <span class="lang lang-es">{article.data.summaryEs}</span>
+              </p>
+              <span class="cat-card-author">{article.data.author}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+
+    {articles.length === 0 && (
+      <div class="cat-empty">
+        <p>
+          <span class="lang lang-en">No articles in this category yet.</span>
+          <span class="lang lang-es">Aún no hay artículos en esta categoría.</span>
+        </p>
+      </div>
+    )}
+
+  </div>
+
+</BaseLayout>
