@@ -110,8 +110,8 @@ const moreListArticles = [
   ...(listSection?.articles || []),
   ...(sidebarSection?.articles || []),
 ].slice(0, 8);
-const moreFeatureArticle = sidebarSection?.articles[0] || allArticles[3];
-const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
+const moreFeatureArticles = (sidebarSection?.articles || []).slice(0, 2);
+const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
 ---
 
 <BaseLayout
@@ -126,63 +126,128 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
     <div class="hero-grid">
 
       <!-- Left: Featured -->
-      {allArticles[0] && (
-        <a href={articleUrl(allArticles[0])} class="story-featured">
-          <span class="badge-breaking">
-            <span class="lang lang-en">Breaking News</span>
-            <span class="lang lang-es">Últimas novedades</span>
-          </span>
-          <h1>
-            <span class="lang lang-en">{allArticles[0].entry.data.titleEn}</span>
-            <span class="lang lang-es">{allArticles[0].entry.data.titleEs}</span>
-          </h1>
-          <img
-            src={allArticles[0].entry.data.image}
-            alt={allArticles[0].entry.data.titleEn}
-            style="width:100%;height:200px;border-radius:6px;margin-bottom:12px;object-fit:cover;"
-          />
-          <p>
-            <span class="lang lang-en">{allArticles[0].entry.data.summaryEn}</span>
-            <span class="lang lang-es">{allArticles[0].entry.data.summaryEs}</span>
-          </p>
-        </a>
-      )}
+      <div class="story-featured">
+        {allArticles.slice(0, 3).map((article, index) => (
+          <a href={articleUrl(article)} class={index === 0 ? "featured-main" : "featured-secondary"}>
+            {index === 0 && (
+              <span class="badge-breaking">
+                <span class="lang lang-en">Breaking News</span>
+                <span class="lang lang-es">Últimas novedades</span>
+              </span>
+            )}
+            <h1 class={index === 0 ? "" : "featured-title"}>
+              <span class="lang lang-en">{article.entry.data.titleEn}</span>
+              <span class="lang lang-es">{article.entry.data.titleEs}</span>
+            </h1>
+            <img
+              src={article.entry.data.image}
+              alt={article.entry.data.titleEn}
+              style={`width:100%;height:${index === 0 ? "200px" : "120px"};border-radius:6px;margin-bottom:12px;object-fit:cover;`}
+            />
+            <p>
+              <span class="lang lang-en">{article.entry.data.summaryEn}</span>
+              <span class="lang lang-es">{article.entry.data.summaryEs}</span>
+            </p>
+          </a>
+        ))}
+      </div>
 
       <!-- Center -->
-      {allArticles[1] && (
-        <div class="story-center">
-          <a href={articleUrl(allArticles[1])}>
+      <div class="story-center">
+        {/* First group: 1 full-width + 2 half-width */}
+        <div class="center-group">
+          <a href={articleUrl(allArticles[3])} class="center-main">
             <img
-              src={allArticles[1].entry.data.image}
-              alt={allArticles[1].entry.data.titleEn}
+              src={allArticles[3].entry.data.image}
+              alt={allArticles[3].entry.data.titleEn}
               style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
             />
             <h3>
-              <span class="lang lang-en">{allArticles[1].entry.data.titleEn}</span>
-              <span class="lang lang-es">{allArticles[1].entry.data.titleEs}</span>
+              <span class="lang lang-en">{allArticles[3].entry.data.titleEn}</span>
+              <span class="lang lang-es">{allArticles[3].entry.data.titleEs}</span>
             </h3>
           </a>
           <div class="sub-stories">
-            {allArticles.slice(2, 4).map((article) => (
-              <a href={articleUrl(article)} class="sub-story">
+            {allArticles.slice(4, 6).map((subArticle) => (
+              <a href={articleUrl(subArticle)} class="sub-story">
                 <img
-                  src={article.entry.data.image}
-                  alt={article.entry.data.titleEn}
+                  src={subArticle.entry.data.image}
+                  alt={subArticle.entry.data.titleEn}
                   style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
                 />
                 <p>
-                  <span class="lang lang-en">{article.entry.data.titleEn}</span>
-                  <span class="lang lang-es">{article.entry.data.titleEs}</span>
+                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
                 </p>
               </a>
             ))}
           </div>
         </div>
-      )}
+
+        {/* Second group: 1 full-width + 2 half-width */}
+        <div class="center-group">
+          <a href={articleUrl(allArticles[6])} class="center-main">
+            <img
+              src={allArticles[6].entry.data.image}
+              alt={allArticles[6].entry.data.titleEn}
+              style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+            />
+            <h3>
+              <span class="lang lang-en">{allArticles[6].entry.data.titleEn}</span>
+              <span class="lang lang-es">{allArticles[6].entry.data.titleEs}</span>
+            </h3>
+          </a>
+          <div class="sub-stories">
+            {allArticles.slice(7, 9).map((subArticle) => (
+              <a href={articleUrl(subArticle)} class="sub-story">
+                <img
+                  src={subArticle.entry.data.image}
+                  alt={subArticle.entry.data.titleEn}
+                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                />
+                <p>
+                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Third group: 1 full-width + 2 half-width */}
+        <div class="center-group">
+          <a href={articleUrl(allArticles[9])} class="center-main">
+            <img
+              src={allArticles[9].entry.data.image}
+              alt={allArticles[9].entry.data.titleEn}
+              style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+            />
+            <h3>
+              <span class="lang lang-en">{allArticles[9].entry.data.titleEn}</span>
+              <span class="lang lang-es">{allArticles[9].entry.data.titleEs}</span>
+            </h3>
+          </a>
+          <div class="sub-stories">
+            {allArticles.slice(10, 12).map((subArticle) => (
+              <a href={articleUrl(subArticle)} class="sub-story">
+                <img
+                  src={subArticle.entry.data.image}
+                  alt={subArticle.entry.data.titleEn}
+                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                />
+                <p>
+                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <!-- Right -->
       <div class="story-right">
-        {allArticles.slice(4, 6).map((article) => (
+        {allArticles.slice(15, 21).map((article) => (
           <a href={articleUrl(article)} class="top-story">
             <img
               src={article.entry.data.image}
@@ -202,7 +267,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
           </a>
         ))}
         <ul class="side-list">
-          {allArticles.slice(6, 10).map((article) => (
+          {allArticles.slice(21, 31).map((article) => (
             <li><a href={articleUrl(article)}>
               <span class="lang lang-en">{article.entry.data.titleEn}</span>
               <span class="lang lang-es">{article.entry.data.titleEs}</span>
@@ -273,29 +338,31 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
       </div>
 
       <!-- Center feature -->
-      {moreFeatureArticle && (
-        <a href={articleUrl(moreFeatureArticle)} class="more-feature">
-          <img
-            src={moreFeatureArticle.entry.data.image}
-            alt={moreFeatureArticle.entry.data.titleEn}
-            style="width:100%;height:200px;border-radius:8px;margin-bottom:14px;object-fit:cover;"
-          />
-          <h3>
-            <span class="lang lang-en">{moreFeatureArticle.entry.data.titleEn}</span>
-            <span class="lang lang-es">{moreFeatureArticle.entry.data.titleEs}</span>
-          </h3>
-          <p>
-            <span class="lang lang-en">{moreFeatureArticle.entry.data.summaryEn}</span>
-            <span class="lang lang-es">{moreFeatureArticle.entry.data.summaryEs}</span>
-          </p>
-        </a>
-      )}
+      <div class="more-feature">
+        {moreFeatureArticles.map((article) => (
+          <a href={articleUrl(article)} class="more-feature-item">
+            <img
+              src={article.entry.data.image}
+              alt={article.entry.data.titleEn}
+              style="width:100%;height:200px;border-radius:8px;margin-bottom:14px;object-fit:cover;"
+            />
+            <h3>
+              <span class="lang lang-en">{article.entry.data.titleEn}</span>
+              <span class="lang lang-es">{article.entry.data.titleEs}</span>
+            </h3>
+            <p>
+              <span class="lang lang-en">{article.entry.data.summaryEn}</span>
+              <span class="lang lang-es">{article.entry.data.summaryEs}</span>
+            </p>
+          </a>
+        ))}
+      </div>
 
       <!-- Right -->
       <div class="more-right">
         {moreRightArticles.map((article, i) => (
-          <a href={articleUrl(article)} class="more-right-item" style={i > 0 ? "padding-top:14px;" : ""}>
-            {i === 0 && (
+          <a href={articleUrl(article)} class="more-right-item" style={i > 1 ? "padding-top:14px;" : ""}>
+            {i < 2 && (
               <img
                 src={article.entry.data.image}
                 alt={article.entry.data.titleEn}
@@ -306,7 +373,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(1, 4);
               <span class="lang lang-en">{article.entry.data.titleEn}</span>
               <span class="lang lang-es">{article.entry.data.titleEs}</span>
             </h4>
-            {i === 0 && (
+            {i < 2 && (
               <p>
                 <span class="lang lang-en">{article.entry.data.summaryEn}</span>
                 <span class="lang lang-es">{article.entry.data.summaryEs}</span>
