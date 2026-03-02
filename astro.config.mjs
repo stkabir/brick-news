@@ -3,10 +3,14 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 import markdoc from '@astrojs/markdoc';
+import keystatic from '@keystatic/astro';
+import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
-    integrations: [react(), markdoc()],
+    output: 'server',
+    adapter: node({ mode: 'standalone' }),
+    integrations: [react(), markdoc(), keystatic()],
     vite: {
         plugins: [tailwindcss()],
     },

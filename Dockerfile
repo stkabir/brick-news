@@ -11,10 +11,27 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
-# Stage 2: Serve with Nginx
-FROM nginx:alpine
+# Stage 2: Run
+FROM node:22-alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./package.json
+
+# Bundle current content as defaults (used to init volume on first deploy)
+COPY --from=build /app/src/content ./src/content-default
+
+# Empty dir that will be overridden by the Docker volume
+RUN mkdir -p ./src/content
+
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
+
+EXPOSE 4321
+
+ENV HOST=0.0.0.0
+ENV PORT=4321
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
