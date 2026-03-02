@@ -7,7 +7,11 @@ export const onRequest = defineMiddleware((context, next) => {
   const url = new URL(context.request.url);
 
   if (url.pathname === '/dashboard' || url.pathname === '/dashboard/') {
-    return context.redirect('/keystatic', 302);
+    return context.redirect('/keystatic/', 302);
+  }
+
+  if (url.pathname === '/keystatic') {
+    return context.redirect('/keystatic/', 301);
   }
 
   if (!url.pathname.startsWith('/keystatic') && !url.pathname.startsWith('/api/keystatic')) {
