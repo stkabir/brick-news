@@ -19,19 +19,11 @@ WORKDIR /app
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
-
-# Bundle current content as defaults (used to init volume on first deploy)
-COPY --from=build /app/src/content ./src/content-default
-
-# Empty dir that will be overridden by the Docker volume
-RUN mkdir -p ./src/content
-
-COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh
+COPY --from=build /app/src/content ./src/content
 
 EXPOSE 4321
 
 ENV HOST=0.0.0.0
 ENV PORT=4321
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["node", "./dist/server/entry.mjs"]
