@@ -1,5 +1,8 @@
 FROM node:22-alpine
 
+# Cache buster - change this value to force a fresh build
+ARG CACHE_BUST=1
+
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
