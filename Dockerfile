@@ -1,5 +1,4 @@
-# Stage 1: Build
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -10,16 +9,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm run build
-
-# Stage 2: Run
-FROM node:22-alpine
-
-WORKDIR /app
-
-COPY --from=build /app/dist ./dist
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package.json ./package.json
-COPY --from=build /app/src/content ./src/content
 
 EXPOSE 4321
 
