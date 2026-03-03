@@ -1,7 +1,15 @@
 import { config, fields, collection } from '@keystatic/core';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 export default config({
-  storage: { kind: 'local' },
+  storage: isDev
+    ? { kind: 'local' }
+    : {
+        kind: 'github',
+        repo: 'stkabir/brick-news',
+        branchPrefix: 'keystatic/',
+      },
 
   collections: {
     articles: collection({

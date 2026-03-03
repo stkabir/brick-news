@@ -11,7 +11,8 @@ COPY pnpm-lock.yaml package.json ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
-RUN pnpm run build
+# NODE_ENV=production so keystatic uses github storage during build
+RUN NODE_ENV=production pnpm run build
 
 EXPOSE 4321
 
