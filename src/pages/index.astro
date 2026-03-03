@@ -128,6 +128,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
             <img
               src={article.entry.data.image}
               alt={article.entry.data.titleEn}
+              transition:name={`article-img-${article.entry.id}`}
             />
             <p>
               <span class="lang lang-en">{article.entry.data.summaryEn}</span>
@@ -147,6 +148,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                 src={allArticles[3].entry.data.image}
                 alt={allArticles[3].entry.data.titleEn}
                 style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+                transition:name={`article-img-${allArticles[3].entry.id}`}
               />
               <h3>
                 <span class="lang lang-en">{allArticles[3].entry.data.titleEn}</span>
@@ -160,6 +162,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                     src={subArticle.entry.data.image}
                     alt={subArticle.entry.data.titleEn}
                     style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                    transition:name={`article-img-${subArticle.entry.id}`}
                   />
                   <p>
                     <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
@@ -179,6 +182,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                 src={allArticles[6].entry.data.image}
                 alt={allArticles[6].entry.data.titleEn}
                 style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+                transition:name={`article-img-${allArticles[6].entry.id}`}
               />
               <h3>
                 <span class="lang lang-en">{allArticles[6].entry.data.titleEn}</span>
@@ -192,6 +196,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                     src={subArticle.entry.data.image}
                     alt={subArticle.entry.data.titleEn}
                     style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                    transition:name={`article-img-${subArticle.entry.id}`}
                   />
                   <p>
                     <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
@@ -211,6 +216,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                 src={allArticles[9].entry.data.image}
                 alt={allArticles[9].entry.data.titleEn}
                 style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+                transition:name={`article-img-${allArticles[9].entry.id}`}
               />
               <h3>
                 <span class="lang lang-en">{allArticles[9].entry.data.titleEn}</span>
@@ -224,6 +230,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                     src={subArticle.entry.data.image}
                     alt={subArticle.entry.data.titleEn}
                     style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                    transition:name={`article-img-${subArticle.entry.id}`}
                   />
                   <p>
                     <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
@@ -244,6 +251,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
               src={article.entry.data.image}
               alt={article.entry.data.titleEn}
               style="width:100px;height:70px;border-radius:4px;flex-shrink:0;object-fit:cover;"
+              transition:name={`article-img-${article.entry.id}`}
             />
             <div class="top-story-text">
               <h4>
@@ -319,6 +327,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
               src={article.entry.data.image}
               alt={article.entry.data.titleEn}
               style="width:60px;height:48px;border-radius:4px;flex-shrink:0;object-fit:cover;"
+              transition:name={`article-img-${article.entry.id}`}
             />
             <p>
               <span class="lang lang-en">{article.entry.data.titleEn}</span>
@@ -336,6 +345,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
               src={article.entry.data.image}
               alt={article.entry.data.titleEn}
               style="width:100%;height:200px;border-radius:8px;margin-bottom:14px;object-fit:cover;"
+              transition:name={`article-img-${article.entry.id}`}
             />
             <h3>
               <span class="lang lang-en">{article.entry.data.titleEn}</span>
@@ -358,6 +368,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                 src={article.entry.data.image}
                 alt={article.entry.data.titleEn}
                 style="width:100%;height:70px;border-radius:4px;margin-bottom:8px;object-fit:cover;"
+                transition:name={`article-img-${article.entry.id}`}
               />
             )}
             <h4>
@@ -412,6 +423,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
                       src={article.entry.data.image}
                       alt={article.entry.data.titleEn}
                       loading="lazy"
+                      transition:name={`article-img-${article.entry.id}`}
                     />
                     <span class="card-badge">
                       <span class="lang lang-en">{article.categoryMeta.titleEn}</span>

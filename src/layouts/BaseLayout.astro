@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { ClientRouter, fade, slide } from 'astro:transitions';
 
 interface NavLink {
   slug: string;
@@ -38,6 +39,7 @@ const {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={descriptionEn} />
+    <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -76,7 +78,7 @@ const {
       </div>
     </header>
 
-    <main>
+    <main transition:animate={fade()}>
       <slot />
     </main>
 

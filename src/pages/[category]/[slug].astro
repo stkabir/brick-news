@@ -3,13 +3,18 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { formatShortDate, formatLongDate } from "../../utils/date";
 
-export const prerender = true;
+export const prerender = false;
 
 type CategoryEntry = CollectionEntry<"categories">;
 type ArticleEntry = CollectionEntry<"articles">;
 type NavLink = { slug: string; titleEn: string; titleEs: string };
 
-const categoryEntries = await getCollection("categories");
+const { category: categorySlug, slug } = Astro.params;
+
+const [categoryEntries, articleEntries] = await Promise.all([
+  getCollection("categories"),
+  getCollection("articles"),
+]);
 
 const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
   slug: c.id,
@@ -17,36 +22,26 @@ const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
   titleEs: c.data.titleEs,
 }));
 
-export async function getStaticPaths() {
-  const articles = await getCollection("articles");
-  const categories = await getCollection("categories");
-  const catMap = new Map(categories.map((c) => [c.id, c.data]));
+const article = articleEntries.find(
+  (a: ArticleEntry) => a.id === slug && a.data.category === categorySlug
+);
 
-  return articles.map((article) => ({
-    params: { category: article.data.category, slug: article.id },
-    props: {
-      article,
-      categoryData: catMap.get(article.data.category),
-      relatedArticles: articles
-        .filter((a) => a.data.category === article.data.category && a.id !== article.id)
-        .sort((a, b) => {
-          if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-          return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
-        }),
-    },
-  }));
+if (!article) {
+  return Astro.redirect("/404");
 }
 
-const { article, categoryData, relatedArticles } = Astro.props as {
-  article: ArticleEntry;
-  categoryData: { titleEn: string; titleEs: string } | undefined;
-  relatedArticles: ArticleEntry[];
-};
+const categoryData = categoryEntries.find((c) => c.id === categorySlug)?.data;
 
+const relatedArticles: ArticleEntry[] = articleEntries
+  .filter((a: ArticleEntry) => a.data.category === categorySlug && a.id !== slug)
+  .sort((a: ArticleEntry, b: ArticleEntry) => {
+    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
+    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+  });
 
 const latestRelated = relatedArticles.slice(0, 2);
 const moreRelated = relatedArticles.slice(2, 8);
-const catSlug = article.data.category;
+const catSlug = categorySlug as string;
 const catEn = categoryData?.titleEn ?? catSlug;
 const catEs = categoryData?.titleEs ?? catSlug;
 ---
@@ -96,7 +91,11 @@ const catEs = categoryData?.titleEs ?? catSlug;
       </div>
 
       <div class="art-hero-img">
-        <img src={article.data.image} alt={article.data.titleEn} />
+        <img
+          src={article.data.image}
+          alt={article.data.titleEn}
+          transition:name={`article-img-${article.id}`}
+        />
       </div>
 
       <div class="art-body">
@@ -118,7 +117,12 @@ const catEs = categoryData?.titleEs ?? catSlug;
           {latestRelated.map((rel) => (
             <a href={`/${catSlug}/${rel.id}`} class="art-related-card">
               <div class="art-related-img">
-                <img src={rel.data.image} alt={rel.data.titleEn} loading="lazy" />
+                <img
+                  src={rel.data.image}
+                  alt={rel.data.titleEn}
+                  loading="lazy"
+                  transition:name={`article-img-${rel.id}`}
+                />
               </div>
               <div class="art-related-body">
                 <span class="art-related-date">
@@ -151,7 +155,12 @@ const catEs = categoryData?.titleEs ?? catSlug;
           {moreRelated.map((rel) => (
             <a href={`/${catSlug}/${rel.id}`} class="cat-card">
               <div class="cat-card-img">
-                <img src={rel.data.image} alt={rel.data.titleEn} loading="lazy" />
+                <img
+                  src={rel.data.image}
+                  alt={rel.data.titleEn}
+                  loading="lazy"
+                  transition:name={`article-img-${rel.id}`}
+                />
               </div>
               <div class="cat-card-body">
                 <span class="cat-card-date">
