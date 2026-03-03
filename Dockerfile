@@ -8,7 +8,7 @@ RUN npm install -g pnpm@10.30.3
 WORKDIR /app
 
 COPY pnpm-lock.yaml package.json ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 RUN pnpm run build
