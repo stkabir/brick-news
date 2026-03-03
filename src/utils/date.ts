@@ -15,6 +15,7 @@ const longOpts: Intl.DateTimeFormatOptions = {
 
 export function formatShortDate(iso: string): DateLabels {
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return { en: "", es: "" };
   return {
     en: d.toLocaleDateString("en-US", shortOpts).toUpperCase(),
     es: d.toLocaleDateString("es-ES", shortOpts).toUpperCase(),
@@ -23,6 +24,7 @@ export function formatShortDate(iso: string): DateLabels {
 
 export function formatLongDate(iso: string): DateLabels {
   const d = new Date(iso);
+  if (isNaN(d.getTime())) return { en: "", es: "" };
   return {
     en: d.toLocaleDateString("en-US", longOpts),
     es: d.toLocaleDateString("es-ES", longOpts),

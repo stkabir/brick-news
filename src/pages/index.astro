@@ -85,9 +85,9 @@ const trendingTabs = trendingArticles
   })
   .map((a) => ({ ...a.categoryMeta, slug: a.entry.data.category }));
 
-// Banner article (first business article)
+// Banner article (first business article, fallback to first article)
 const bannerArticle =
-  allArticles.find((a) => a.entry.data.category === "business") || allArticles[2];
+  allArticles.find((a) => a.entry.data.category === "business") || allArticles[0];
 
 // More news: list + sidebar sections
 const listSection = groupedSections.find((s) => s.sectionLayout === "list");

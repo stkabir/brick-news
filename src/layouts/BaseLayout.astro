@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { ClientRouter, fade, slide } from 'astro:transitions';
+import { ClientRouter, fade } from 'astro:transitions';
 
 interface NavLink {
   slug: string;
@@ -13,6 +13,7 @@ interface Props {
   pageTitle?: string;
   descriptionEn?: string;
   descriptionEs?: string;
+  ogImage?: string;
 }
 
 const {
@@ -20,7 +21,10 @@ const {
   pageTitle = "Brickell News",
   descriptionEn = "Your local source for Brickell news.",
   descriptionEs = "Tu fuente local de noticias de Brickell.",
+  ogImage,
 } = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
 
 ---
 <html lang="en" data-locale="en">
@@ -32,13 +36,19 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     <meta name="description" content={descriptionEn} />
+    <link rel="canonical" href={canonicalUrl} />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={descriptionEn} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Brickell News" />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <meta property="og:image:width" content="1200" />}
+    {ogImage && <meta property="og:image:height" content="630" />}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={descriptionEn} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
     <ClientRouter />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -95,11 +105,10 @@ const {
           </p>
         </div>
         <div class="newsletter-form">
-          <input type="email" placeholder="hello@brickell.news" style="border: 1px solid #ccc;"/>
-          <button class="btn-subscribe">
+          <a href="mailto:editor@brickell.news?subject=Newsletter%20Subscription" class="btn-subscribe">
             <span class="lang lang-en">Subscribe</span>
             <span class="lang lang-es">Suscribirse</span>
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -154,8 +163,13 @@ const {
 
       async function loadArticles() {
         if (articles) return articles;
-        const res = await fetch('/api/search.json');
-        articles = await res.json();
+        try {
+          const res = await fetch('/api/search.json');
+          if (!res.ok) throw new Error('Search unavailable');
+          articles = await res.json();
+        } catch (e) {
+          articles = [];
+        }
         return articles;
       }
 
