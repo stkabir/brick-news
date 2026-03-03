@@ -1,14 +1,20 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { formatShortDate } from "../../utils/date";
+
+export const prerender = false;
 
 type CategoryEntry = CollectionEntry<"categories">;
 type ArticleEntry = CollectionEntry<"articles">;
-
 type NavLink = { slug: string; titleEn: string; titleEs: string };
-type DateLabels = { en: string; es: string };
 
-const categoryEntries = await getCollection("categories");
+const { category: categorySlug } = Astro.params;
+
+const [categoryEntries, articleEntries] = await Promise.all([
+  getCollection("categories"),
+  getCollection("articles"),
+]);
 
 const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
   slug: c.id,
@@ -16,38 +22,18 @@ const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
   titleEs: c.data.titleEs,
 }));
 
-export async function getStaticPaths() {
-  const categories = await getCollection("categories");
-  const articles = await getCollection("articles");
+const category = categoryEntries.find((c) => c.id === categorySlug);
 
-  return categories.map((cat) => ({
-    params: { category: cat.id },
-    props: {
-      category: cat,
-      articles: articles
-        .filter((a) => a.data.category === cat.id)
-        .sort((a, b) => {
-          if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-          return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
-        }),
-    },
-  }));
+if (!category) {
+  return Astro.redirect("/404");
 }
 
-const { category, articles } = Astro.props as {
-  category: CategoryEntry;
-  articles: ArticleEntry[];
-};
-
-const dateOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
-
-const formatDate = (iso: string): DateLabels => {
-  const d = new Date(iso);
-  return {
-    en: d.toLocaleDateString("en-US", dateOpts).toUpperCase(),
-    es: d.toLocaleDateString("es-ES", dateOpts).toUpperCase(),
-  };
-};
+const articles: ArticleEntry[] = articleEntries
+  .filter((a: ArticleEntry) => a.data.category === categorySlug)
+  .sort((a: ArticleEntry, b: ArticleEntry) => {
+    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
+    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+  });
 
 const featured = articles[0];
 const rest = articles.slice(1);
@@ -78,12 +64,16 @@ const rest = articles.slice(1);
     {featured && (
       <a href={`/${category.id}/${featured.id}`} class="cat-featured">
         <div class="cat-featured-img">
-          <img src={featured.data.image} alt={featured.data.titleEn} />
+          <img
+            src={featured.data.image}
+            alt={featured.data.titleEn}
+            transition:name={`article-img-${featured.id}`}
+          />
         </div>
         <div class="cat-featured-body">
           <span class="cat-featured-date">
-            <span class="lang lang-en">{formatDate(featured.data.date).en}</span>
-            <span class="lang lang-es">{formatDate(featured.data.date).es}</span>
+            <span class="lang lang-en">{formatShortDate(featured.data.date).en}</span>
+            <span class="lang lang-es">{formatShortDate(featured.data.date).es}</span>
           </span>
           <h2>
             <span class="lang lang-en">{featured.data.titleEn}</span>
@@ -104,12 +94,17 @@ const rest = articles.slice(1);
         {rest.map((article) => (
           <a href={`/${category.id}/${article.id}`} class="cat-card">
             <div class="cat-card-img">
-              <img src={article.data.image} alt={article.data.titleEn} loading="lazy" />
+              <img
+                src={article.data.image}
+                alt={article.data.titleEn}
+                loading="lazy"
+                transition:name={`article-img-${article.id}`}
+              />
             </div>
             <div class="cat-card-body">
               <span class="cat-card-date">
-                <span class="lang lang-en">{formatDate(article.data.date).en}</span>
-                <span class="lang lang-es">{formatDate(article.data.date).es}</span>
+                <span class="lang lang-en">{formatShortDate(article.data.date).en}</span>
+                <span class="lang lang-es">{formatShortDate(article.data.date).es}</span>
               </span>
               <h3>
                 <span class="lang lang-en">{article.data.titleEn}</span>

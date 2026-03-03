@@ -1,0 +1,38 @@
+name: Deploy to Dokploy
+
+on:
+  push:
+    branches: [ newspaper ]
+  pull_request:
+    branches: [ newspaper ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Enable corepack and install pnpm
+      run: |
+        corepack enable
+        corepack prepare pnpm@latest --activate
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build application
+      run: pnpm run build
+
+    - name: Trigger Dokploy webhook
+      run: |
+        curl -X POST \
+          "http://160.153.182.212:3000/api/deploy/IlwYttTPzQ9O-fqZ6IADG" \
+          -H "Content-Type: application/json" \
+          -d '{"ref": "${{ github.ref }}", "commit": "${{ github.sha }}"}'
