@@ -3,12 +3,12 @@ FROM node:22-alpine
 # Cache buster - change this value to force a fresh build
 ARG CACHE_BUST=1
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@10.30.3
 
 WORKDIR /app
 
 COPY pnpm-lock.yaml package.json ./
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
 RUN pnpm run build
