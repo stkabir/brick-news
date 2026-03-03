@@ -1,12 +1,14 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { formatShortDate } from "../../utils/date";
+
+export const prerender = true;
 
 type CategoryEntry = CollectionEntry<"categories">;
 type ArticleEntry = CollectionEntry<"articles">;
 
 type NavLink = { slug: string; titleEn: string; titleEs: string };
-type DateLabels = { en: string; es: string };
 
 const categoryEntries = await getCollection("categories");
 
@@ -39,15 +41,6 @@ const { category, articles } = Astro.props as {
   articles: ArticleEntry[];
 };
 
-const dateOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
-
-const formatDate = (iso: string): DateLabels => {
-  const d = new Date(iso);
-  return {
-    en: d.toLocaleDateString("en-US", dateOpts).toUpperCase(),
-    es: d.toLocaleDateString("es-ES", dateOpts).toUpperCase(),
-  };
-};
 
 const featured = articles[0];
 const rest = articles.slice(1);
@@ -82,8 +75,8 @@ const rest = articles.slice(1);
         </div>
         <div class="cat-featured-body">
           <span class="cat-featured-date">
-            <span class="lang lang-en">{formatDate(featured.data.date).en}</span>
-            <span class="lang lang-es">{formatDate(featured.data.date).es}</span>
+            <span class="lang lang-en">{formatShortDate(featured.data.date).en}</span>
+            <span class="lang lang-es">{formatShortDate(featured.data.date).es}</span>
           </span>
           <h2>
             <span class="lang lang-en">{featured.data.titleEn}</span>
@@ -108,8 +101,8 @@ const rest = articles.slice(1);
             </div>
             <div class="cat-card-body">
               <span class="cat-card-date">
-                <span class="lang lang-en">{formatDate(article.data.date).en}</span>
-                <span class="lang lang-es">{formatDate(article.data.date).es}</span>
+                <span class="lang lang-en">{formatShortDate(article.data.date).en}</span>
+                <span class="lang lang-es">{formatShortDate(article.data.date).es}</span>
               </span>
               <h3>
                 <span class="lang lang-en">{article.data.titleEn}</span>

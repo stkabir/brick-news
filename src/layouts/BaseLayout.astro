@@ -21,19 +21,6 @@ const {
   descriptionEs = "Tu fuente local de noticias de Brickell.",
 } = Astro.props;
 
-const now = new Date();
-const dateEn = now.toLocaleDateString("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-const dateEs = now.toLocaleDateString("es-ES", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
 ---
 <html lang="en" data-locale="en">
   <head>
@@ -44,6 +31,13 @@ const dateEs = now.toLocaleDateString("es-ES", {
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     <meta name="description" content={descriptionEn} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={descriptionEn} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Brickell News" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={descriptionEn} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -131,14 +125,15 @@ const dateEs = now.toLocaleDateString("es-ES", {
       const storageKey = "brickell-news-locale";
       const root = document.documentElement;
       const toggleButton = document.querySelector('[data-lang-toggle]');
-      const searchBox = document.getElementById('searchBox');
+      const searchInput = document.getElementById('searchBox');
+      const dropdown = document.getElementById('searchDropdown');
 
       const setLocale = (locale) => {
         if (!['en', 'es'].includes(locale)) locale = 'en';
         root.dataset.locale = locale;
         root.lang = locale;
-        if (searchBox) {
-          searchBox.placeholder = locale === 'en' ? 'Search Brickell\u2026' : 'Buscar en Brickell\u2026';
+        if (searchInput) {
+          searchInput.placeholder = locale === 'en' ? 'Search Brickell\u2026' : 'Buscar en Brickell\u2026';
         }
       };
 
@@ -152,8 +147,6 @@ const dateEs = now.toLocaleDateString("es-ES", {
       });
 
       // ——— Search ———
-      const searchInput = document.getElementById('searchBox');
-      const dropdown = document.getElementById('searchDropdown');
       let articles = null;
       let debounceTimer = null;
 
@@ -183,25 +176,56 @@ const dateEs = now.toLocaleDateString("es-ES", {
       function renderResults(results) {
         const locale = getLocale();
         const isEn = locale === 'en';
+        dropdown.innerHTML = '';
 
         if (results.length === 0) {
-          dropdown.innerHTML = '<div class="search-empty">' + (isEn ? 'No results found' : 'Sin resultados') + '</div>';
+          const empty = document.createElement('div');
+          empty.className = 'search-empty';
+          empty.textContent = isEn ? 'No results found' : 'Sin resultados';
+          dropdown.appendChild(empty);
           dropdown.classList.add('active');
           return;
         }
 
-        dropdown.innerHTML = results.map(function(a) {
-          var title = isEn ? a.titleEn : a.titleEs;
-          var cat = isEn ? a.categoryEn : a.categoryEs;
-          return '<a class="search-dropdown-item" href="/' + a.category + '/' + a.id + '">'
-            + '<img src="' + a.image + '&w=120&h=90" alt="" />'
-            + '<div class="search-dropdown-info">'
-            + '<h4>' + title + '</h4>'
-            + '<div class="search-dropdown-meta">'
-            + '<span class="search-dropdown-cat">' + cat + '</span>'
-            + '<span class="search-dropdown-author">' + a.author + '</span>'
-            + '</div></div></a>';
-        }).join('');
+        results.forEach(function(a) {
+          const title = isEn ? a.titleEn : a.titleEs;
+          const cat = isEn ? a.categoryEn : a.categoryEs;
+
+          const link = document.createElement('a');
+          link.className = 'search-dropdown-item';
+          link.href = '/' + encodeURIComponent(a.category) + '/' + encodeURIComponent(a.id);
+
+          const imgSrc = a.image + (a.image.includes('?') ? '&' : '?') + 'w=120&h=90';
+          const img = document.createElement('img');
+          img.src = imgSrc;
+          img.alt = '';
+
+          const info = document.createElement('div');
+          info.className = 'search-dropdown-info';
+
+          const h4 = document.createElement('h4');
+          h4.textContent = title;
+
+          const meta = document.createElement('div');
+          meta.className = 'search-dropdown-meta';
+
+          const catSpan = document.createElement('span');
+          catSpan.className = 'search-dropdown-cat';
+          catSpan.textContent = cat;
+
+          const authorSpan = document.createElement('span');
+          authorSpan.className = 'search-dropdown-author';
+          authorSpan.textContent = a.author;
+
+          meta.appendChild(catSpan);
+          meta.appendChild(authorSpan);
+          info.appendChild(h4);
+          info.appendChild(meta);
+          link.appendChild(img);
+          link.appendChild(info);
+          dropdown.appendChild(link);
+        });
+
         dropdown.classList.add('active');
       }
 

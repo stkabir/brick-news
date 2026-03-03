@@ -24,7 +24,9 @@ export const onRequest = defineMiddleware((context, next) => {
     const [scheme, encoded] = auth.split(' ');
     if (scheme === 'Basic' && encoded) {
       const decoded = atob(encoded);
-      const [user, password] = decoded.split(':');
+      const colonIndex = decoded.indexOf(':');
+      const user = decoded.slice(0, colonIndex);
+      const password = decoded.slice(colonIndex + 1);
       if (user === ADMIN_USER && password === ADMIN_PASSWORD) {
         return next();
       }

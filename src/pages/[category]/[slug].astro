@@ -1,11 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { formatShortDate, formatLongDate } from "../../utils/date";
+
+export const prerender = true;
 
 type CategoryEntry = CollectionEntry<"categories">;
 type ArticleEntry = CollectionEntry<"articles">;
 type NavLink = { slug: string; titleEn: string; titleEs: string };
-type DateLabels = { en: string; es: string };
 
 const categoryEntries = await getCollection("categories");
 
@@ -41,24 +43,6 @@ const { article, categoryData, relatedArticles } = Astro.props as {
   relatedArticles: ArticleEntry[];
 };
 
-const dateOpts: Intl.DateTimeFormatOptions = { weekday: "long", month: "long", day: "numeric", year: "numeric" };
-
-const formatDate = (iso: string): DateLabels => {
-  const d = new Date(iso);
-  return {
-    en: d.toLocaleDateString("en-US", dateOpts),
-    es: d.toLocaleDateString("es-ES", dateOpts),
-  };
-};
-
-const shortDateOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" };
-const formatShortDate = (iso: string): DateLabels => {
-  const d = new Date(iso);
-  return {
-    en: d.toLocaleDateString("en-US", shortDateOpts).toUpperCase(),
-    es: d.toLocaleDateString("es-ES", shortDateOpts).toUpperCase(),
-  };
-};
 
 const latestRelated = relatedArticles.slice(0, 2);
 const moreRelated = relatedArticles.slice(2, 8);
@@ -97,8 +81,8 @@ const catEs = categoryData?.titleEs ?? catSlug;
           <span class="lang lang-es">{catEs}</span>
         </span>
         <span class="art-date">
-          <span class="lang lang-en">{formatDate(article.data.date).en}</span>
-          <span class="lang lang-es">{formatDate(article.data.date).es}</span>
+          <span class="lang lang-en">{formatLongDate(article.data.date).en}</span>
+          <span class="lang lang-es">{formatLongDate(article.data.date).es}</span>
         </span>
       </div>
 

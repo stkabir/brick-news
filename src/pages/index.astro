@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { formatShortDate } from "../utils/date";
 
 type CategoryEntry = CollectionEntry<"categories">;
 type SectionEntry = CollectionEntry<"sections">;
@@ -8,11 +9,10 @@ type ArticleEntry = CollectionEntry<"articles">;
 
 type NavLink = { slug: string; titleEn: string; titleEs: string };
 type CategoryMeta = { titleEn: string; titleEs: string };
-type DateLabels = { en: string; es: string };
 type EnrichedArticle = {
   entry: ArticleEntry;
   categoryMeta: CategoryMeta;
-  formattedDate: DateLabels;
+  formattedDate: { en: string; es: string };
 };
 
 const [categoryEntries, sectionEntries, articleEntries] = await Promise.all([
@@ -40,20 +40,6 @@ const getCategoryMeta = (slug: string): CategoryMeta => {
   };
 };
 
-const dateOpts: Intl.DateTimeFormatOptions = {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-};
-
-const formatDate = (iso: string): DateLabels => {
-  const d = new Date(iso);
-  return {
-    en: d.toLocaleDateString("en-US", dateOpts).toUpperCase(),
-    es: d.toLocaleDateString("es-ES", dateOpts).toUpperCase(),
-  };
-};
-
 const sortArticles = (a: ArticleEntry, b: ArticleEntry) => {
   if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
   return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
@@ -62,7 +48,7 @@ const sortArticles = (a: ArticleEntry, b: ArticleEntry) => {
 const enrichArticle = (a: ArticleEntry): EnrichedArticle => ({
   entry: a,
   categoryMeta: getCategoryMeta(a.data.category),
-  formattedDate: formatDate(a.data.date),
+  formattedDate: formatShortDate(a.data.date),
 });
 
 const articleUrl = (a: EnrichedArticle) => `/${a.entry.data.category}/${a.entry.id}`;
@@ -97,7 +83,7 @@ const trendingTabs = trendingArticles
     seenCats.add(a.entry.data.category);
     return true;
   })
-  .map((a) => a.categoryMeta);
+  .map((a) => ({ ...a.categoryMeta, slug: a.entry.data.category }));
 
 // Banner article (first business article)
 const bannerArticle =
@@ -154,94 +140,100 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
       <!-- Center -->
       <div class="story-center">
         {/* First group: 1 full-width + 2 half-width */}
-        <div class="center-group">
-          <a href={articleUrl(allArticles[3])} class="center-main">
-            <img
-              src={allArticles[3].entry.data.image}
-              alt={allArticles[3].entry.data.titleEn}
-              style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
-            />
-            <h3>
-              <span class="lang lang-en">{allArticles[3].entry.data.titleEn}</span>
-              <span class="lang lang-es">{allArticles[3].entry.data.titleEs}</span>
-            </h3>
-          </a>
-          <div class="sub-stories">
-            {allArticles.slice(4, 6).map((subArticle) => (
-              <a href={articleUrl(subArticle)} class="sub-story">
-                <img
-                  src={subArticle.entry.data.image}
-                  alt={subArticle.entry.data.titleEn}
-                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
-                />
-                <p>
-                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
-                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
-                </p>
-              </a>
-            ))}
+        {allArticles[3] && (
+          <div class="center-group">
+            <a href={articleUrl(allArticles[3])} class="center-main">
+              <img
+                src={allArticles[3].entry.data.image}
+                alt={allArticles[3].entry.data.titleEn}
+                style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+              />
+              <h3>
+                <span class="lang lang-en">{allArticles[3].entry.data.titleEn}</span>
+                <span class="lang lang-es">{allArticles[3].entry.data.titleEs}</span>
+              </h3>
+            </a>
+            <div class="sub-stories">
+              {allArticles.slice(4, 6).map((subArticle) => (
+                <a href={articleUrl(subArticle)} class="sub-story">
+                  <img
+                    src={subArticle.entry.data.image}
+                    alt={subArticle.entry.data.titleEn}
+                    style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                  />
+                  <p>
+                    <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                    <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
+                  </p>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Second group: 1 full-width + 2 half-width */}
-        <div class="center-group">
-          <a href={articleUrl(allArticles[6])} class="center-main">
-            <img
-              src={allArticles[6].entry.data.image}
-              alt={allArticles[6].entry.data.titleEn}
-              style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
-            />
-            <h3>
-              <span class="lang lang-en">{allArticles[6].entry.data.titleEn}</span>
-              <span class="lang lang-es">{allArticles[6].entry.data.titleEs}</span>
-            </h3>
-          </a>
-          <div class="sub-stories">
-            {allArticles.slice(7, 9).map((subArticle) => (
-              <a href={articleUrl(subArticle)} class="sub-story">
-                <img
-                  src={subArticle.entry.data.image}
-                  alt={subArticle.entry.data.titleEn}
-                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
-                />
-                <p>
-                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
-                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
-                </p>
-              </a>
-            ))}
+        {allArticles[6] && (
+          <div class="center-group">
+            <a href={articleUrl(allArticles[6])} class="center-main">
+              <img
+                src={allArticles[6].entry.data.image}
+                alt={allArticles[6].entry.data.titleEn}
+                style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+              />
+              <h3>
+                <span class="lang lang-en">{allArticles[6].entry.data.titleEn}</span>
+                <span class="lang lang-es">{allArticles[6].entry.data.titleEs}</span>
+              </h3>
+            </a>
+            <div class="sub-stories">
+              {allArticles.slice(7, 9).map((subArticle) => (
+                <a href={articleUrl(subArticle)} class="sub-story">
+                  <img
+                    src={subArticle.entry.data.image}
+                    alt={subArticle.entry.data.titleEn}
+                    style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                  />
+                  <p>
+                    <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                    <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
+                  </p>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Third group: 1 full-width + 2 half-width */}
-        <div class="center-group">
-          <a href={articleUrl(allArticles[9])} class="center-main">
-            <img
-              src={allArticles[9].entry.data.image}
-              alt={allArticles[9].entry.data.titleEn}
-              style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
-            />
-            <h3>
-              <span class="lang lang-en">{allArticles[9].entry.data.titleEn}</span>
-              <span class="lang lang-es">{allArticles[9].entry.data.titleEs}</span>
-            </h3>
-          </a>
-          <div class="sub-stories">
-            {allArticles.slice(10, 12).map((subArticle) => (
-              <a href={articleUrl(subArticle)} class="sub-story">
-                <img
-                  src={subArticle.entry.data.image}
-                  alt={subArticle.entry.data.titleEn}
-                  style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
-                />
-                <p>
-                  <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
-                  <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
-                </p>
-              </a>
-            ))}
+        {allArticles[9] && (
+          <div class="center-group">
+            <a href={articleUrl(allArticles[9])} class="center-main">
+              <img
+                src={allArticles[9].entry.data.image}
+                alt={allArticles[9].entry.data.titleEn}
+                style="width:100%;height:170px;border-radius:6px;margin-bottom:10px;object-fit:cover;"
+              />
+              <h3>
+                <span class="lang lang-en">{allArticles[9].entry.data.titleEn}</span>
+                <span class="lang lang-es">{allArticles[9].entry.data.titleEs}</span>
+              </h3>
+            </a>
+            <div class="sub-stories">
+              {allArticles.slice(10, 12).map((subArticle) => (
+                <a href={articleUrl(subArticle)} class="sub-story">
+                  <img
+                    src={subArticle.entry.data.image}
+                    alt={subArticle.entry.data.titleEn}
+                    style="width:100%;height:80px;border-radius:4px;margin-bottom:6px;object-fit:cover;"
+                  />
+                  <p>
+                    <span class="lang lang-en">{subArticle.entry.data.titleEn}</span>
+                    <span class="lang lang-es">{subArticle.entry.data.titleEs}</span>
+                  </p>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <!-- Right -->
@@ -401,7 +393,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
         </div>
         <div class="trending-tabs">
           {trendingTabs.map((tab, i) => (
-            <span class={`tab${i === 0 ? " active" : ""}`}>
+            <span class={`tab${i === 0 ? " active" : ""}`} data-category={tab.slug}>
               <span class="lang lang-en">{tab.titleEn}</span>
               <span class="lang lang-es">{tab.titleEs}</span>
             </span>
@@ -413,7 +405,7 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
         <div class="splide__track">
           <ul class="splide__list">
             {trendingArticles.map((article) => (
-              <li class="splide__slide">
+              <li class="splide__slide" data-category={article.entry.data.category}>
                 <a href={articleUrl(article)} class="trend-card">
                   <div class="trend-card-img">
                     <img
@@ -456,6 +448,9 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
       gap: '20px',
       pagination: true,
       arrows: true,
+      autoplay: true,
+      interval: 4000,
+      pauseOnHover: true,
       breakpoints: {
         768: { perPage: 1 },
       },
@@ -464,12 +459,17 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
     slider.mount();
 
     // Tab toggle
-    const tabs = document.querySelectorAll('.tab');
+    const tabs = document.querySelectorAll<HTMLElement>('.tab');
+    const slides = document.querySelectorAll<HTMLElement>('.splide__slide[data-category]:not(.splide__slide--clone)');
+
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        slider.go(0);
+
+        const cat = tab.dataset.category;
+        const targetIndex = Array.from(slides).findIndex(s => s.dataset.category === cat);
+        slider.go(targetIndex >= 0 ? targetIndex : 0);
       });
     });
   </script>
