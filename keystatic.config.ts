@@ -8,7 +8,6 @@ export default config({
     : {
         kind: 'github',
         repo: 'stkabir/brick-news',
-        branchPrefix: 'keystatic/',
       },
 
   collections: {
