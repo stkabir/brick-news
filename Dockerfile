@@ -2,6 +2,7 @@ FROM node:22-alpine
 
 # Cache buster - change this value to force a fresh build
 ARG CACHE_BUST=1
+ARG LARAVEL_API_URL=http://127.0.0.1:8000
 
 RUN npm install -g pnpm@10.30.3
 
@@ -11,8 +12,7 @@ COPY pnpm-lock.yaml package.json ./
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
-# NODE_ENV=production so keystatic uses github storage during build
-RUN NODE_ENV=production pnpm run build
+RUN NODE_ENV=production LARAVEL_API_URL=${LARAVEL_API_URL} pnpm run build
 
 EXPOSE 4321
 
