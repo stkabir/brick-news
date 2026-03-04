@@ -97,10 +97,17 @@ const catEs = categoryData?.titleEs ?? catSlug;
       </div>
 
       <div class="art-body">
-        <p>
-          <span class="lang lang-en">{article.summaryEn}</span>
-          <span class="lang lang-es">{article.summaryEs}</span>
-        </p>
+        {article.bodyEn || article.bodyEs ? (
+          <>
+            {article.bodyEn && <div class="lang lang-en" set:html={article.bodyEn} />}
+            {article.bodyEs && <div class="lang lang-es" set:html={article.bodyEs} />}
+          </>
+        ) : (
+          <p>
+            <span class="lang lang-en">{article.summaryEn}</span>
+            <span class="lang lang-es">{article.summaryEs}</span>
+          </p>
+        )}
       </div>
     </article>
 
