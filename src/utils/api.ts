@@ -34,10 +34,10 @@ export interface Section {
   order: number;
 }
 
-const API_BASE = (import.meta.env.LARAVEL_API_URL ?? '') + '/api';
+const API_BASE = (import.meta.env.LARAVEL_API_URL ?? 'http://127.0.0.1:8000') + '/api';
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`);
+  const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
   const json = await res.json();
   return (json.data ?? json) as T;
