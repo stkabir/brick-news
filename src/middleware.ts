@@ -27,8 +27,16 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/keystatic/', 301);
   }
 
-  // Protected routes: require Basic Auth
-  if (url.pathname.startsWith('/keystatic') || url.pathname.startsWith('/api/keystatic')) {
+  // Keystatic API routes: let through without Basic Auth.
+  // Keystatic handles its own authentication via signed session cookies (KEYSTATIC_SECRET).
+  if (url.pathname.startsWith('/api/keystatic')) {
+    const response = await next();
+    Object.entries(SECURITY_HEADERS).forEach(([k, v]) => response.headers.set(k, v));
+    return response;
+  }
+
+  // Keystatic admin UI: require Basic Auth
+  if (url.pathname.startsWith('/keystatic')) {
     const auth = context.request.headers.get('Authorization');
 
     if (auth) {
