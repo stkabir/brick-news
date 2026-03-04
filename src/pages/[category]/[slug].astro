@@ -1,42 +1,39 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import { getArticles, getCategories, getArticle } from "../../utils/api";
+import type { Article, Category } from "../../utils/api";
 import { formatShortDate, formatLongDate } from "../../utils/date";
 
 export const prerender = false;
 
-type CategoryEntry = CollectionEntry<"categories">;
-type ArticleEntry = CollectionEntry<"articles">;
 type NavLink = { slug: string; titleEn: string; titleEs: string };
 
 const { category: categorySlug, slug } = Astro.params;
 
-const [categoryEntries, articleEntries] = await Promise.all([
-  getCollection("categories"),
-  getCollection("articles"),
+const [categories, article] = await Promise.all([
+  getCategories(),
+  getArticle(slug as string),
 ]);
 
-const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
-  slug: c.id,
-  titleEn: c.data.titleEn,
-  titleEs: c.data.titleEs,
+const navLinks: NavLink[] = categories.map((c: Category) => ({
+  slug: c.slug,
+  titleEn: c.titleEn,
+  titleEs: c.titleEs,
 }));
 
-const article = articleEntries.find(
-  (a: ArticleEntry) => a.id === slug && a.data.category === categorySlug
-);
-
-if (!article) {
+if (!article || article.category !== categorySlug) {
   return Astro.redirect("/404");
 }
 
-const categoryData = categoryEntries.find((c) => c.id === categorySlug)?.data;
+const categoryData = categories.find((c: Category) => c.slug === categorySlug);
 
-const relatedArticles: ArticleEntry[] = articleEntries
-  .filter((a: ArticleEntry) => a.data.category === categorySlug && a.id !== slug)
-  .sort((a: ArticleEntry, b: ArticleEntry) => {
-    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+const allCategoryArticles = await getArticles(categorySlug);
+
+const relatedArticles: Article[] = allCategoryArticles
+  .filter((a: Article) => a.slug !== slug)
+  .sort((a: Article, b: Article) => {
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    return new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime();
   });
 
 const latestRelated = relatedArticles.slice(0, 2);
@@ -48,10 +45,10 @@ const catEs = categoryData?.titleEs ?? catSlug;
 
 <BaseLayout
   navLinks={navLinks}
-  pageTitle={`${article.data.titleEn} | Brickell News`}
-  descriptionEn={article.data.summaryEn}
-  descriptionEs={article.data.summaryEs}
-  ogImage={article.data.image}
+  pageTitle={`${article.titleEn} | Brickell News`}
+  descriptionEn={article.summaryEn ?? ""}
+  descriptionEs={article.summaryEs ?? ""}
+  ogImage={article.image ?? undefined}
 >
 
   <div class="container art-page">
@@ -77,32 +74,32 @@ const catEs = categoryData?.titleEs ?? catSlug;
           <span class="lang lang-es">{catEs}</span>
         </span>
         <span class="art-date">
-          <span class="lang lang-en">{formatLongDate(article.data.date).en}</span>
-          <span class="lang lang-es">{formatLongDate(article.data.date).es}</span>
+          <span class="lang lang-en">{formatLongDate(article.date ?? "").en}</span>
+          <span class="lang lang-es">{formatLongDate(article.date ?? "").es}</span>
         </span>
       </div>
 
       <h1 class="art-title">
-        <span class="lang lang-en">{article.data.titleEn}</span>
-        <span class="lang lang-es">{article.data.titleEs}</span>
+        <span class="lang lang-en">{article.titleEn}</span>
+        <span class="lang lang-es">{article.titleEs}</span>
       </h1>
 
       <div class="art-author-line">
-        <span class="art-author">{article.data.author}</span>
+        <span class="art-author">{article.author}</span>
       </div>
 
       <div class="art-hero-img">
         <img
-          src={article.data.image}
-          alt={article.data.titleEn}
-          transition:name={`article-img-${article.id}`}
+          src={article.image}
+          alt={article.titleEn}
+          transition:name={`article-img-${article.slug}`}
         />
       </div>
 
       <div class="art-body">
         <p>
-          <span class="lang lang-en">{article.data.summaryEn}</span>
-          <span class="lang lang-es">{article.data.summaryEs}</span>
+          <span class="lang lang-en">{article.summaryEn}</span>
+          <span class="lang lang-es">{article.summaryEs}</span>
         </p>
       </div>
     </article>
@@ -116,27 +113,27 @@ const catEs = categoryData?.titleEs ?? catSlug;
         </h2>
         <div class="art-related-grid">
           {latestRelated.map((rel) => (
-            <a href={`/${catSlug}/${rel.id}`} class="art-related-card">
+            <a href={`/${catSlug}/${rel.slug}`} class="art-related-card">
               <div class="art-related-img">
                 <img
-                  src={rel.data.image}
-                  alt={rel.data.titleEn}
+                  src={rel.image}
+                  alt={rel.titleEn}
                   loading="lazy"
-                  transition:name={`article-img-${rel.id}`}
+                  transition:name={`article-img-${rel.slug}`}
                 />
               </div>
               <div class="art-related-body">
                 <span class="art-related-date">
-                  <span class="lang lang-en">{formatShortDate(rel.data.date).en}</span>
-                  <span class="lang lang-es">{formatShortDate(rel.data.date).es}</span>
+                  <span class="lang lang-en">{formatShortDate(rel.date ?? "").en}</span>
+                  <span class="lang lang-es">{formatShortDate(rel.date ?? "").es}</span>
                 </span>
                 <h3>
-                  <span class="lang lang-en">{rel.data.titleEn}</span>
-                  <span class="lang lang-es">{rel.data.titleEs}</span>
+                  <span class="lang lang-en">{rel.titleEn}</span>
+                  <span class="lang lang-es">{rel.titleEs}</span>
                 </h3>
                 <p>
-                  <span class="lang lang-en">{rel.data.summaryEn}</span>
-                  <span class="lang lang-es">{rel.data.summaryEs}</span>
+                  <span class="lang lang-en">{rel.summaryEn}</span>
+                  <span class="lang lang-es">{rel.summaryEs}</span>
                 </p>
               </div>
             </a>
@@ -154,29 +151,29 @@ const catEs = categoryData?.titleEs ?? catSlug;
         </h2>
         <div class="cat-grid">
           {moreRelated.map((rel) => (
-            <a href={`/${catSlug}/${rel.id}`} class="cat-card">
+            <a href={`/${catSlug}/${rel.slug}`} class="cat-card">
               <div class="cat-card-img">
                 <img
-                  src={rel.data.image}
-                  alt={rel.data.titleEn}
+                  src={rel.image}
+                  alt={rel.titleEn}
                   loading="lazy"
-                  transition:name={`article-img-${rel.id}`}
+                  transition:name={`article-img-${rel.slug}`}
                 />
               </div>
               <div class="cat-card-body">
                 <span class="cat-card-date">
-                  <span class="lang lang-en">{formatShortDate(rel.data.date).en}</span>
-                  <span class="lang lang-es">{formatShortDate(rel.data.date).es}</span>
+                  <span class="lang lang-en">{formatShortDate(rel.date ?? "").en}</span>
+                  <span class="lang lang-es">{formatShortDate(rel.date ?? "").es}</span>
                 </span>
                 <h3>
-                  <span class="lang lang-en">{rel.data.titleEn}</span>
-                  <span class="lang lang-es">{rel.data.titleEs}</span>
+                  <span class="lang lang-en">{rel.titleEn}</span>
+                  <span class="lang lang-es">{rel.titleEs}</span>
                 </h3>
                 <p>
-                  <span class="lang lang-en">{rel.data.summaryEn}</span>
-                  <span class="lang lang-es">{rel.data.summaryEs}</span>
+                  <span class="lang lang-en">{rel.summaryEn}</span>
+                  <span class="lang lang-es">{rel.summaryEs}</span>
                 </p>
-                <span class="cat-card-author">{rel.data.author}</span>
+                <span class="cat-card-author">{rel.author}</span>
               </div>
             </a>
           ))}

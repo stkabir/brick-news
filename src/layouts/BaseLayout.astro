@@ -158,35 +158,22 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
       });
 
       // ——— Search ———
-      let articles = null;
       let debounceTimer = null;
 
-      async function loadArticles() {
-        if (articles) return articles;
+      async function searchArticles(query) {
+        const q = query.trim();
+        if (q.length < 2) return [];
         try {
-          const res = await fetch('/api/search.json');
-          if (!res.ok) throw new Error('Search unavailable');
-          articles = await res.json();
+          const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+          if (!res.ok) return [];
+          return await res.json();
         } catch (e) {
-          articles = [];
+          return [];
         }
-        return articles;
       }
 
       function getLocale() {
         return root.dataset.locale || 'en';
-      }
-
-      function searchArticles(query, data) {
-        const q = query.toLowerCase().trim();
-        if (!q) return [];
-        return data.filter(function(a) {
-          return a.titleEn.toLowerCase().includes(q)
-            || a.titleEs.toLowerCase().includes(q)
-            || a.summaryEn.toLowerCase().includes(q)
-            || a.summaryEs.toLowerCase().includes(q)
-            || a.author.toLowerCase().includes(q);
-        }).slice(0, 6);
       }
 
       function renderResults(results) {
@@ -209,7 +196,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
 
           const link = document.createElement('a');
           link.className = 'search-dropdown-item';
-          link.href = '/' + encodeURIComponent(a.category) + '/' + encodeURIComponent(a.id);
+          link.href = '/' + encodeURIComponent(a.category) + '/' + encodeURIComponent(a.slug);
 
           const imgSrc = a.image + (a.image.includes('?') ? '&' : '?') + 'w=120&h=90';
           const img = document.createElement('img');
@@ -256,10 +243,9 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
           var val = searchInput.value;
           if (!val.trim()) { hideDropdown(); return; }
           debounceTimer = setTimeout(async function() {
-            var data = await loadArticles();
-            var results = searchArticles(val, data);
+            var results = await searchArticles(val);
             renderResults(results);
-          }, 250);
+          }, 300);
         });
 
         searchInput.addEventListener('keydown', function(e) {

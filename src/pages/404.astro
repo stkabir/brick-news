@@ -1,14 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import { getCategories } from "../utils/api";
+import type { Category } from "../utils/api";
 
-type CategoryEntry = CollectionEntry<"categories">;
-
-const categoryEntries = await getCollection("categories");
-const navLinks = categoryEntries.map((c: CategoryEntry) => ({
-  slug: c.id,
-  titleEn: c.data.titleEn,
-  titleEs: c.data.titleEs,
+const categories = await getCategories();
+const navLinks = categories.map((c: Category) => ({
+  slug: c.slug,
+  titleEn: c.titleEn,
+  titleEs: c.titleEs,
 }));
 ---
 

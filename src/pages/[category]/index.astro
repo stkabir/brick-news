@@ -1,38 +1,37 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getCollection, type CollectionEntry } from "astro:content";
+import { getArticles, getCategories } from "../../utils/api";
+import type { Article, Category } from "../../utils/api";
 import { formatShortDate } from "../../utils/date";
 
 export const prerender = false;
 
-type CategoryEntry = CollectionEntry<"categories">;
-type ArticleEntry = CollectionEntry<"articles">;
 type NavLink = { slug: string; titleEn: string; titleEs: string };
 
 const { category: categorySlug } = Astro.params;
 
-const [categoryEntries, articleEntries] = await Promise.all([
-  getCollection("categories"),
-  getCollection("articles"),
+const [categories, articleEntries] = await Promise.all([
+  getCategories(),
+  getArticles(),
 ]);
 
-const navLinks: NavLink[] = categoryEntries.map((c: CategoryEntry) => ({
-  slug: c.id,
-  titleEn: c.data.titleEn,
-  titleEs: c.data.titleEs,
+const navLinks: NavLink[] = categories.map((c: Category) => ({
+  slug: c.slug,
+  titleEn: c.titleEn,
+  titleEs: c.titleEs,
 }));
 
-const category = categoryEntries.find((c) => c.id === categorySlug);
+const category = categories.find((c: Category) => c.slug === categorySlug);
 
 if (!category) {
   return Astro.redirect("/404");
 }
 
-const articles: ArticleEntry[] = articleEntries
-  .filter((a: ArticleEntry) => a.data.category === categorySlug)
-  .sort((a: ArticleEntry, b: ArticleEntry) => {
-    if (b.data.priority !== a.data.priority) return b.data.priority - a.data.priority;
-    return new Date(b.data.date).getTime() - new Date(a.data.date).getTime();
+const articles: Article[] = articleEntries
+  .filter((a: Article) => a.category === categorySlug)
+  .sort((a: Article, b: Article) => {
+    if (b.priority !== a.priority) return b.priority - a.priority;
+    return new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime();
   });
 
 const featured = articles[0];
@@ -41,9 +40,9 @@ const rest = articles.slice(1);
 
 <BaseLayout
   navLinks={navLinks}
-  pageTitle={`${category.data.titleEn} | Brickell News`}
-  descriptionEn={`Latest ${category.data.titleEn} news from Brickell.`}
-  descriptionEs={`Últimas noticias de ${category.data.titleEs} en Brickell.`}
+  pageTitle={`${category.titleEn} | Brickell News`}
+  descriptionEn={`Latest ${category.titleEn} news from Brickell.`}
+  descriptionEs={`Últimas noticias de ${category.titleEs} en Brickell.`}
 >
 
   <div class="container cat-page">
@@ -51,8 +50,8 @@ const rest = articles.slice(1);
     <!-- Category Header -->
     <div class="cat-header">
       <h1 class="cat-title">
-        <span class="lang lang-en">{category.data.titleEn}</span>
-        <span class="lang lang-es">{category.data.titleEs}</span>
+        <span class="lang lang-en">{category.titleEn}</span>
+        <span class="lang lang-es">{category.titleEs}</span>
       </h1>
       <p class="cat-count">
         <span class="lang lang-en">{articles.length} {articles.length === 1 ? 'article' : 'articles'}</span>
@@ -62,28 +61,28 @@ const rest = articles.slice(1);
 
     <!-- Featured Article -->
     {featured && (
-      <a href={`/${category.id}/${featured.id}`} class="cat-featured">
+      <a href={`/${category.slug}/${featured.slug}`} class="cat-featured">
         <div class="cat-featured-img">
           <img
-            src={featured.data.image}
-            alt={featured.data.titleEn}
-            transition:name={`article-img-${featured.id}`}
+            src={featured.image}
+            alt={featured.titleEn}
+            transition:name={`article-img-${featured.slug}`}
           />
         </div>
         <div class="cat-featured-body">
           <span class="cat-featured-date">
-            <span class="lang lang-en">{formatShortDate(featured.data.date).en}</span>
-            <span class="lang lang-es">{formatShortDate(featured.data.date).es}</span>
+            <span class="lang lang-en">{formatShortDate(featured.date ?? "").en}</span>
+            <span class="lang lang-es">{formatShortDate(featured.date ?? "").es}</span>
           </span>
           <h2>
-            <span class="lang lang-en">{featured.data.titleEn}</span>
-            <span class="lang lang-es">{featured.data.titleEs}</span>
+            <span class="lang lang-en">{featured.titleEn}</span>
+            <span class="lang lang-es">{featured.titleEs}</span>
           </h2>
           <p>
-            <span class="lang lang-en">{featured.data.summaryEn}</span>
-            <span class="lang lang-es">{featured.data.summaryEs}</span>
+            <span class="lang lang-en">{featured.summaryEn}</span>
+            <span class="lang lang-es">{featured.summaryEs}</span>
           </p>
-          <span class="cat-featured-author">{featured.data.author}</span>
+          <span class="cat-featured-author">{featured.author}</span>
         </div>
       </a>
     )}
@@ -92,29 +91,29 @@ const rest = articles.slice(1);
     {rest.length > 0 && (
       <div class="cat-grid">
         {rest.map((article) => (
-          <a href={`/${category.id}/${article.id}`} class="cat-card">
+          <a href={`/${category.slug}/${article.slug}`} class="cat-card">
             <div class="cat-card-img">
               <img
-                src={article.data.image}
-                alt={article.data.titleEn}
+                src={article.image}
+                alt={article.titleEn}
                 loading="lazy"
-                transition:name={`article-img-${article.id}`}
+                transition:name={`article-img-${article.slug}`}
               />
             </div>
             <div class="cat-card-body">
               <span class="cat-card-date">
-                <span class="lang lang-en">{formatShortDate(article.data.date).en}</span>
-                <span class="lang lang-es">{formatShortDate(article.data.date).es}</span>
+                <span class="lang lang-en">{formatShortDate(article.date ?? "").en}</span>
+                <span class="lang lang-es">{formatShortDate(article.date ?? "").es}</span>
               </span>
               <h3>
-                <span class="lang lang-en">{article.data.titleEn}</span>
-                <span class="lang lang-es">{article.data.titleEs}</span>
+                <span class="lang lang-en">{article.titleEn}</span>
+                <span class="lang lang-es">{article.titleEs}</span>
               </h3>
               <p>
-                <span class="lang lang-en">{article.data.summaryEn}</span>
-                <span class="lang lang-es">{article.data.summaryEs}</span>
+                <span class="lang lang-en">{article.summaryEn}</span>
+                <span class="lang lang-es">{article.summaryEs}</span>
               </p>
-              <span class="cat-card-author">{article.data.author}</span>
+              <span class="cat-card-author">{article.author}</span>
             </div>
           </a>
         ))}
