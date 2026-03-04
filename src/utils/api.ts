@@ -36,7 +36,6 @@ export interface Section {
 
 async function apiFetch<T>(path: string): Promise<T> {
   const apiBase = (process.env.LARAVEL_API_URL ?? import.meta.env.LARAVEL_API_URL ?? 'http://127.0.0.1:8000') + '/api';
-  console.log(`[API] ${apiBase}${path}`);
   const res = await fetch(`${apiBase}${path}`, { cache: 'no-store' });
   if (!res.ok) throw new Error(`API error ${res.status}: ${path}`);
   const json = await res.json();
