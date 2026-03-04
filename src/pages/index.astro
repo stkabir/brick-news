@@ -13,9 +13,9 @@ type EnrichedArticle = {
 };
 
 const [categories, sections, articleEntries] = await Promise.all([
-  getCategories(),
-  getSections(),
-  getArticles(),
+  getCategories().catch(() => [] as import('../utils/api').Category[]),
+  getSections().catch(() => [] as import('../utils/api').Section[]),
+  getArticles().catch(() => [] as import('../utils/api').Article[]),
 ]);
 
 const navLinks: NavLink[] = categories.map((c: Category) => ({
