@@ -34,7 +34,7 @@ export interface Section {
   order: number;
 }
 
-const API_BASE = (import.meta.env.LARAVEL_API_URL ?? 'http://127.0.0.1:8000') + '/api';
+const API_BASE = (process.env.LARAVEL_API_URL ?? import.meta.env.LARAVEL_API_URL ?? 'http://127.0.0.1:8000') + '/api';
 
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { cache: 'no-store' });
