@@ -1,14 +1,14 @@
 import { config, fields, collection } from '@keystatic/core';
 
-const isDev = process.env.NODE_ENV === 'development';
+const useGitHub = !!process.env.KEYSTATIC_GITHUB_CLIENT_ID;
 
 export default config({
-  storage: isDev
-    ? { kind: 'local' }
-    : {
+  storage: useGitHub
+    ? {
         kind: 'github',
         repo: 'stkabir/brick-news',
-      },
+      }
+    : { kind: 'local' },
 
   collections: {
     articles: collection({
