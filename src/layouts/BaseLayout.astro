@@ -198,6 +198,9 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
       const toggleButton = document.querySelector('[data-lang-toggle]');
       const searchInput = document.getElementById('searchBox');
       const dropdown = document.getElementById('searchDropdown');
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileMenuClose = document.getElementById('mobileMenuClose');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
       const setLocale = (locale) => {
         if (!['en', 'es'].includes(locale)) locale = 'en';
@@ -215,6 +218,33 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
         const next = root.dataset.locale === 'en' ? 'es' : 'en';
         setLocale(next);
         localStorage.setItem(storageKey, next);
+      });
+
+      // Mobile Menu
+      const openMobileMenu = () => {
+        mobileMenuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      };
+
+      const closeMobileMenu = () => {
+        mobileMenuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+
+      mobileMenuToggle?.addEventListener('click', openMobileMenu);
+      mobileMenuClose?.addEventListener('click', closeMobileMenu);
+
+      mobileMenuOverlay?.addEventListener('click', (e) => {
+        if (e.target === mobileMenuOverlay) {
+          closeMobileMenu();
+        }
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && mobileMenuOverlay?.classList.contains('active')) {
+          closeMobileMenu();
+        }
       });
 
       // ——— Search ———
