@@ -78,11 +78,11 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
         </nav>
 
         <div class="header-right">
-          <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+          <label for="mobile-menu-toggle" class="mobile-menu-toggle-label">
             <span></span>
             <span></span>
             <span></span>
-          </button>
+          </label>
           <input type="text" class="search-box" id="searchBox" placeholder="Search Brickell…" autocomplete="off" />
           <div class="search-dropdown" id="searchDropdown"></div>
           <button class="btn-lang" data-lang-toggle>
@@ -93,6 +93,9 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
       </div>
     </header>
 
+    <!-- Mobile Menu Checkbox (must be sibling of overlay) -->
+    <input type="checkbox" id="mobile-menu-toggle" class="mobile-menu-toggle-checkbox" />
+
     <!-- Mobile Category Menu -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay">
       <div class="mobile-menu-container">
@@ -100,10 +103,10 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
           <div class="mobile-menu-logo">
             <img src="/img/logo.jpeg" alt="Brickell News" />
           </div>
-          <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
+          <label for="mobile-menu-toggle" class="mobile-menu-close">
             <span></span>
             <span></span>
-          </button>
+          </label>
         </div>
 
         <nav class="mobile-categories">
@@ -119,7 +122,6 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
           {navLinks.filter(l => l.slug !== 'home').map((link, index) => (
             <a href={`/${link.slug}`} class="mobile-category-tile" style={`--tile-index: ${index};`}>
               <div class="tile-content">
-                <span class="tile-number">{String(index + 1).padStart(2, '0')}</span>
                 <span class="tile-title">
                   <span class="lang lang-en">{link.titleEn}</span>
                   <span class="lang lang-es">{link.titleEs}</span>
