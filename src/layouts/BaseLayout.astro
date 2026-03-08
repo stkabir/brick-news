@@ -195,157 +195,148 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
     <script is:inline>
       const storageKey = "brickell-news-locale";
       const root = document.documentElement;
-      const toggleButton = document.querySelector('[data-lang-toggle]');
-      const searchInput = document.getElementById('searchBox');
-      const dropdown = document.getElementById('searchDropdown');
-      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-      const mobileMenuClose = document.getElementById('mobileMenuClose');
-      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
-      const setLocale = (locale) => {
+      function setLocale(locale) {
         if (!['en', 'es'].includes(locale)) locale = 'en';
         root.dataset.locale = locale;
         root.lang = locale;
+        const searchInput = document.getElementById('searchBox');
         if (searchInput) {
           searchInput.placeholder = locale === 'en' ? 'Search Brickell\u2026' : 'Buscar en Brickell\u2026';
         }
-      };
+      }
 
+      // Restore saved locale on every navigation
       const saved = localStorage.getItem(storageKey);
       if (saved) setLocale(saved);
 
-      toggleButton?.addEventListener('click', () => {
-        const next = root.dataset.locale === 'en' ? 'es' : 'en';
-        setLocale(next);
-        localStorage.setItem(storageKey, next);
-      });
+      function initPage() {
+        const toggleButton = document.querySelector('[data-lang-toggle]');
+        const searchInput = document.getElementById('searchBox');
+        const dropdown = document.getElementById('searchDropdown');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
 
-      // Mobile Menu
-      const openMobileMenu = () => {
-        mobileMenuOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      };
+        // ——— Lang toggle ———
+        toggleButton?.addEventListener('click', () => {
+          const next = root.dataset.locale === 'en' ? 'es' : 'en';
+          setLocale(next);
+          localStorage.setItem(storageKey, next);
+        });
 
-      const closeMobileMenu = () => {
-        mobileMenuOverlay.classList.remove('active');
-        document.body.style.overflow = '';
-      };
+        // ——— Mobile Menu ———
+        const closeMobileMenu = () => {
+          mobileMenuOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        };
 
-      mobileMenuToggle?.addEventListener('click', openMobileMenu);
-      mobileMenuClose?.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay?.addEventListener('click', (e) => {
+          if (e.target === mobileMenuOverlay) closeMobileMenu();
+        });
 
-      mobileMenuOverlay?.addEventListener('click', (e) => {
-        if (e.target === mobileMenuOverlay) {
-          closeMobileMenu();
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && mobileMenuOverlay?.classList.contains('active')) {
+            closeMobileMenu();
+          }
+        });
+
+        // ——— Search ———
+        let debounceTimer = null;
+
+        async function searchArticles(query) {
+          const q = query.trim();
+          if (q.length < 2) return [];
+          try {
+            const res = await fetch('/api/search?q=' + encodeURIComponent(q));
+            if (!res.ok) return [];
+            return await res.json();
+          } catch (e) {
+            return [];
+          }
         }
-      });
 
-      // Close menu on escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && mobileMenuOverlay?.classList.contains('active')) {
-          closeMobileMenu();
-        }
-      });
+        function renderResults(results) {
+          const isEn = (root.dataset.locale || 'en') === 'en';
+          dropdown.innerHTML = '';
 
-      // ——— Search ———
-      let debounceTimer = null;
+          if (results.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'search-empty';
+            empty.textContent = isEn ? 'No results found' : 'Sin resultados';
+            dropdown.appendChild(empty);
+            dropdown.classList.add('active');
+            return;
+          }
 
-      async function searchArticles(query) {
-        const q = query.trim();
-        if (q.length < 2) return [];
-        try {
-          const res = await fetch('/api/search?q=' + encodeURIComponent(q));
-          if (!res.ok) return [];
-          return await res.json();
-        } catch (e) {
-          return [];
-        }
-      }
+          results.forEach(function(a) {
+            const title = isEn ? a.titleEn : a.titleEs;
+            const cat = isEn ? a.categoryEn : a.categoryEs;
 
-      function getLocale() {
-        return root.dataset.locale || 'en';
-      }
+            const link = document.createElement('a');
+            link.className = 'search-dropdown-item';
+            link.href = '/' + encodeURIComponent(a.category) + '/' + encodeURIComponent(a.slug);
 
-      function renderResults(results) {
-        const locale = getLocale();
-        const isEn = locale === 'en';
-        dropdown.innerHTML = '';
+            const imgSrc = a.image + (a.image.includes('?') ? '&' : '?') + 'w=120&h=90';
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.alt = '';
 
-        if (results.length === 0) {
-          const empty = document.createElement('div');
-          empty.className = 'search-empty';
-          empty.textContent = isEn ? 'No results found' : 'Sin resultados';
-          dropdown.appendChild(empty);
+            const info = document.createElement('div');
+            info.className = 'search-dropdown-info';
+
+            const h4 = document.createElement('h4');
+            h4.textContent = title;
+
+            const meta = document.createElement('div');
+            meta.className = 'search-dropdown-meta';
+
+            const catSpan = document.createElement('span');
+            catSpan.className = 'search-dropdown-cat';
+            catSpan.textContent = cat;
+
+            const authorSpan = document.createElement('span');
+            authorSpan.className = 'search-dropdown-author';
+            authorSpan.textContent = a.author;
+
+            meta.appendChild(catSpan);
+            meta.appendChild(authorSpan);
+            info.appendChild(h4);
+            info.appendChild(meta);
+            link.appendChild(img);
+            link.appendChild(info);
+            dropdown.appendChild(link);
+          });
+
           dropdown.classList.add('active');
-          return;
         }
 
-        results.forEach(function(a) {
-          const title = isEn ? a.titleEn : a.titleEs;
-          const cat = isEn ? a.categoryEn : a.categoryEs;
+        function hideDropdown() {
+          if (!dropdown) return;
+          dropdown.classList.remove('active');
+          dropdown.innerHTML = '';
+        }
 
-          const link = document.createElement('a');
-          link.className = 'search-dropdown-item';
-          link.href = '/' + encodeURIComponent(a.category) + '/' + encodeURIComponent(a.slug);
+        if (searchInput && dropdown) {
+          searchInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            var val = searchInput.value;
+            if (!val.trim()) { hideDropdown(); return; }
+            debounceTimer = setTimeout(async function() {
+              var results = await searchArticles(val);
+              renderResults(results);
+            }, 300);
+          });
 
-          const imgSrc = a.image + (a.image.includes('?') ? '&' : '?') + 'w=120&h=90';
-          const img = document.createElement('img');
-          img.src = imgSrc;
-          img.alt = '';
+          searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') { hideDropdown(); searchInput.blur(); }
+          });
 
-          const info = document.createElement('div');
-          info.className = 'search-dropdown-info';
-
-          const h4 = document.createElement('h4');
-          h4.textContent = title;
-
-          const meta = document.createElement('div');
-          meta.className = 'search-dropdown-meta';
-
-          const catSpan = document.createElement('span');
-          catSpan.className = 'search-dropdown-cat';
-          catSpan.textContent = cat;
-
-          const authorSpan = document.createElement('span');
-          authorSpan.className = 'search-dropdown-author';
-          authorSpan.textContent = a.author;
-
-          meta.appendChild(catSpan);
-          meta.appendChild(authorSpan);
-          info.appendChild(h4);
-          info.appendChild(meta);
-          link.appendChild(img);
-          link.appendChild(info);
-          dropdown.appendChild(link);
-        });
-
-        dropdown.classList.add('active');
+          document.addEventListener('click', function(e) {
+            if (!e.target.closest('.header-right')) hideDropdown();
+          });
+        }
       }
 
-      function hideDropdown() {
-        dropdown.classList.remove('active');
-        dropdown.innerHTML = '';
-      }
-
-      if (searchInput && dropdown) {
-        searchInput.addEventListener('input', function() {
-          clearTimeout(debounceTimer);
-          var val = searchInput.value;
-          if (!val.trim()) { hideDropdown(); return; }
-          debounceTimer = setTimeout(async function() {
-            var results = await searchArticles(val);
-            renderResults(results);
-          }, 300);
-        });
-
-        searchInput.addEventListener('keydown', function(e) {
-          if (e.key === 'Escape') { hideDropdown(); searchInput.blur(); }
-        });
-
-        document.addEventListener('click', function(e) {
-          if (!e.target.closest('.header-right')) hideDropdown();
-        });
-      }
+      document.addEventListener('astro:page-load', initPage);
     </script>
   </body>
 </html>
