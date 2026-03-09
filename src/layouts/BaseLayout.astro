@@ -210,6 +210,30 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
       const saved = localStorage.getItem(storageKey);
       if (saved) setLocale(saved);
 
+      let debounceTimer = null;
+
+      function onKeydown(e) {
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        if (e.key === 'Escape' && mobileMenuOverlay?.classList.contains('active')) {
+          mobileMenuOverlay.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      function onDocClick(e) {
+        if (!e.target.closest('.header-right')) {
+          const dropdown = document.getElementById('searchDropdown');
+          if (dropdown) {
+            dropdown.classList.remove('active');
+            dropdown.innerHTML = '';
+          }
+        }
+      }
+
+      // Attach document-level listeners once — they survive navigations
+      document.addEventListener('keydown', onKeydown);
+      document.addEventListener('click', onDocClick);
+
       function initPage() {
         const toggleButton = document.querySelector('[data-lang-toggle]');
         const searchInput = document.getElementById('searchBox');
@@ -233,15 +257,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
           if (e.target === mobileMenuOverlay) closeMobileMenu();
         });
 
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && mobileMenuOverlay?.classList.contains('active')) {
-            closeMobileMenu();
-          }
-        });
-
         // ——— Search ———
-        let debounceTimer = null;
-
         async function searchArticles(query) {
           const q = query.trim();
           if (q.length < 2) return [];
@@ -328,10 +344,6 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
 
           searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') { hideDropdown(); searchInput.blur(); }
-          });
-
-          document.addEventListener('click', function(e) {
-            if (!e.target.closest('.header-right')) hideDropdown();
           });
         }
       }
