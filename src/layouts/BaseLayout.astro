@@ -19,7 +19,7 @@ interface Props {
 const {
   navLinks,
   pageTitle = "Brickell News",
-  descriptionEn = "Miami at the Center. World in Focus. Breaking international news & geopolitics Lifestyle | Community | Environment Publisher @sebastianacosta",
+  descriptionEn = "Miami at the Center. World in Focus. Breaking international news & geopolitics Lifestyle | Community | Environment",
   descriptionEs = "Tu fuente local de noticias de Brickell.",
   ogImage,
 } = Astro.props;
@@ -30,8 +30,7 @@ const canonicalUrl = new URL(Astro.url.pathname, 'https://brickell.news').href;
 <html lang="en" data-locale="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
