@@ -9,6 +9,7 @@ export interface Article {
   bodyEs: string | null;
   image: string | null;
   category: string;
+  section: string | null;
   author: string | null;
   date: string | null;
   featured: boolean;
@@ -20,6 +21,7 @@ export interface Category {
   slug: string;
   titleEn: string;
   titleEs: string;
+  defaultSection: string | null;
 }
 
 export interface Section {
@@ -29,8 +31,7 @@ export interface Section {
   titleEs: string;
   descriptionEn: string | null;
   descriptionEs: string | null;
-  sectionLayout: 'hero' | 'grid' | 'list' | 'sidebar';
-  categories: string[];
+  sectionLayout: 'grid' | 'list' | 'sidebar';
   order: number;
 }
 

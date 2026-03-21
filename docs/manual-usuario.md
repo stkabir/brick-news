@@ -21,7 +21,7 @@ Al entrar verás un menú lateral izquierdo con tres secciones:
 | Ícono | Sección | Para qué sirve |
 |-------|---------|----------------|
 | 📰 | **Articles** | Publicar y editar artículos |
-| 🏷️ | **Categories** | Administrar las categorías del sitio |
+| 🏷️ | **Categories** | Administrar las categorías y su sección por defecto |
 | ▦ | **Sections** | Configurar las secciones de la portada |
 
 ---
@@ -66,12 +66,24 @@ Desde la tabla puedes:
 | Campo | Descripción |
 |-------|-------------|
 | **Slug** | Identificador único en la URL (ej. `miami-art-week-2025`). Se genera solo al escribir el título en inglés. Solo modificar si es necesario. |
-| **Category** | Categoría a la que pertenece el artículo. Seleccionar del menú desplegable. |
+| **Category** | Categoría a la que pertenece el artículo. Al seleccionarla, el artículo hereda automáticamente la sección por defecto de esa categoría. |
+| **Section** | *(Opcional)* Sección donde aparecerá el artículo. Si se deja vacío, se usa la sección por defecto de la categoría. Completar solo si este artículo en particular debe aparecer en una zona diferente. |
 | **Author** | Nombre del autor o redactor. |
 | **Date** | Fecha de publicación del artículo. |
 | **Image URL** | Dirección web de la imagen principal (debe comenzar con `https://`). |
 | **Featured** | Activar si el artículo debe destacarse en la portada (interruptor azul = activo). |
 | **Priority** | Número que controla el orden de aparición. Mayor número = aparece primero. Usar: `0` normal, `10` importante, `20` muy importante. |
+
+#### Secciones disponibles
+
+| Sección | Dónde aparece en la portada |
+|---------|-----------------------------|
+| **Trending** (`trending`) | Carrusel **Trending Developments** (parte inferior de la portada) |
+| **Top Stories** (`top-stories`) | **More News** — columna izquierda (lista de titulares) |
+| **Featured** (`featured`) | **More News** — columna central y derecha (tarjetas destacadas) |
+| *(vacío)* | Solo aparece en el grid principal: hero, columna central y sidebar superior |
+
+> **Regla general:** la mayoría de los artículos no necesitan que se les asigne sección manualmente — basta con asignar la categoría correcta y el artículo aparecerá en la zona que le corresponde según la configuración de esa categoría.
 
 3. Hacer clic en **Create Article** para guardar y publicar.
 
@@ -98,7 +110,19 @@ Desde la tabla puedes:
 
 ## Categorías
 
-Las categorías organizan los artículos y aparecen en el menú de navegación del sitio.
+Las categorías organizan los artículos y aparecen en el menú de navegación del sitio. Cada categoría puede tener una **sección por defecto**: todos los artículos de esa categoría aparecerán automáticamente en esa zona de la portada, sin necesidad de configurarlo en cada artículo.
+
+### Configuración actual
+
+| Categoría | Sección por defecto | Zona en portada |
+|-----------|---------------------|-----------------|
+| Business | Featured | More News — tarjetas |
+| Events | Trending | Carrusel Trending |
+| Headline News | Top Stories | More News — lista |
+| Lifestyle | Featured | More News — tarjetas |
+| News | Top Stories | More News — lista |
+| Real Estate | Trending | Carrusel Trending |
+| Home | *(ninguna)* | Solo grid principal |
 
 ### Ver categorías
 
@@ -114,6 +138,7 @@ Hacer clic en **Categories** en el menú lateral.
 | **Title (EN)** | Nombre de la categoría en inglés (ej. `Business`). Al escribirlo, el *Slug* se genera automáticamente. |
 | **Title (ES)** | Nombre de la categoría en español (ej. `Negocios`). |
 | **Slug** | Identificador único (ej. `business`). Se genera solo — no modificar salvo que sea necesario. |
+| **Default Section** | Sección donde aparecerán por defecto todos los artículos de esta categoría. Seleccionar del menú desplegable. |
 
 3. Hacer clic en **Create Category**.
 
@@ -129,7 +154,15 @@ Usar los íconos de lápiz ✏️ o basura 🗑️ en la tabla.
 
 ## Secciones
 
-Las secciones definen cómo se agrupa el contenido en la portada del sitio. Generalmente se configuran una sola vez y no es necesario tocarlas con frecuencia.
+Las secciones definen las zonas de la portada donde se agrupa el contenido. Hay tres secciones activas y generalmente no es necesario modificarlas.
+
+### Secciones activas
+
+| Slug | Nombre | Layout | Zona en portada |
+|------|--------|--------|-----------------|
+| `trending` | Trending Developments | `grid` | Carrusel en la parte inferior |
+| `top-stories` | Top Stories | `list` | More News — columna izquierda |
+| `featured` | Featured | `sidebar` | More News — columna central y derecha |
 
 ### Ver secciones
 
@@ -142,10 +175,11 @@ Hacer clic en **Sections** en el menú lateral.
 | **Title (EN)** | Nombre de la sección en inglés. |
 | **Title (ES)** | Nombre de la sección en español. |
 | **Slug** | Identificador único (se genera automáticamente). |
-| **Description (EN/ES)** | Descripción opcional que aparece debajo del título de la sección. |
-| **Section Layout** | Diseño visual de la sección: `hero` (grande, destacado), `grid` (cuadrícula), `list` (lista), `sidebar` (con columna lateral). |
-| **Category slugs** | Categorías cuyos artículos aparecen en esta sección. Escribir el slug de la categoría y presionar Enter para agregarlo (ej. `business`). |
+| **Description (EN/ES)** | Descripción opcional que aparece debajo del título de la sección en la portada. |
+| **Section Layout** | Diseño visual: `grid` (carrusel), `list` (lista de titulares), `sidebar` (tarjetas con imagen). |
 | **Order** | Orden de aparición en la portada. Número menor = aparece antes. |
+
+> Los artículos aparecen en una sección de dos formas: (1) porque su **categoría** tiene esa sección como default, o (2) porque se les asignó esa sección directamente en el formulario del artículo.
 
 ---
 
@@ -155,7 +189,10 @@ Hacer clic en **Sections** en el menú lateral.
 Inmediatamente después de guardarlo. No hay que esperar ni hacer ningún paso adicional.
 
 **¿Puedo dejar un artículo en borrador?**
-No, actualmente todos los artículos guardados se publican. Si no querés que aparezca, dejarlo sin categoría o con prioridad negativa (ej. `-1`) hasta que esté listo.
+No, actualmente todos los artículos guardados se publican. Si no querés que aparezca, asignarle prioridad negativa (ej. `-1`) hasta que esté listo.
+
+**¿Tengo que asignar una sección a cada artículo?**
+No. Si la categoría del artículo tiene una sección por defecto configurada, el artículo la hereda automáticamente. Solo es necesario asignar sección manualmente cuando se quiere que un artículo aparezca en una zona diferente a la de su categoría.
 
 **¿Qué pasa si el artículo no tiene imagen?**
 El artículo se muestra sin imagen. Se recomienda siempre incluir una URL de imagen para mejor presentación.
@@ -174,8 +211,11 @@ Se genera automáticamente desde el título en inglés y generalmente no es nece
 - **Summary**: texto corto (2–3 oraciones) que aparece en las tarjetas y listados del sitio.
 - **Body**: artículo completo con formato enriquecido, visible solo cuando el lector entra al artículo.
 
+**¿Cómo controlo en qué parte de la portada aparece un artículo?**
+La forma más sencilla es configurar la **sección por defecto de la categoría** — así todos los artículos de esa categoría se ubican automáticamente. Para un artículo puntual que deba ir a una zona diferente, usar el campo **Section** en el formulario del artículo.
+
 **¿Cómo ordeno los artículos en el sitio?**
-Usando el campo **Priority**. Los artículos con número más alto aparecen primero dentro de su categoría. Artículos con la misma prioridad se ordenan por fecha (más reciente primero).
+Usando el campo **Priority**. Los artículos con número más alto aparecen primero. Artículos con la misma prioridad se ordenan por fecha (más reciente primero).
 
 **¿Qué significa "Featured"?**
 Marca el artículo como destacado. Los artículos destacados pueden aparecer en posiciones especiales en la portada dependiendo de cómo estén configuradas las secciones.

@@ -49,7 +49,7 @@ const enrichArticle = (a: Article): EnrichedArticle => ({
 
 const articleUrl = (a: EnrichedArticle) => `/${a.article.category}/${a.article.slug}`;
 
-// All articles sorted by priority
+// All articles sorted by date (newest first)
 const allArticles = [...articleEntries].sort(sortArticles).map(enrichArticle);
 
 // Sections grouped by layout
@@ -63,7 +63,7 @@ const groupedSections = [...sections]
     descriptionEn: s.descriptionEn,
     descriptionEs: s.descriptionEs,
     articles: articleEntries
-      .filter((a: Article) => s.categories.includes(a.category))
+      .filter((a: Article) => a.section === s.slug)
       .sort(sortArticles)
       .map(enrichArticle),
   }));
