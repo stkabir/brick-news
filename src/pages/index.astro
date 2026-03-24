@@ -449,37 +449,44 @@ const moreRightArticles = (sidebarSection?.articles || []).slice(2, 8);
     import Splide from '@splidejs/splide';
     import '@splidejs/splide/css';
 
-    const slider = new Splide('#trendingSlider', {
-      type: 'loop',
-      perPage: 3,
-      perMove: 3,
-      gap: '20px',
-      pagination: true,
-      arrows: true,
-      autoplay: true,
-      interval: 4000,
-      pauseOnHover: true,
-      breakpoints: {
-        768: { perPage: 1 },
-      },
-    });
+    function initSlider() {
+      const el = document.querySelector('#trendingSlider');
+      if (!el) return;
 
-    slider.mount();
-
-    // Tab toggle
-    const tabs = document.querySelectorAll<HTMLElement>('.tab');
-    const slides = document.querySelectorAll<HTMLElement>('.splide__slide[data-category]:not(.splide__slide--clone)');
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-
-        const cat = tab.dataset.category;
-        const targetIndex = Array.from(slides).findIndex(s => s.dataset.category === cat);
-        slider.go(targetIndex >= 0 ? targetIndex : 0);
+      const slider = new Splide('#trendingSlider', {
+        type: 'loop',
+        perPage: 3,
+        perMove: 3,
+        gap: '20px',
+        pagination: true,
+        arrows: true,
+        autoplay: true,
+        interval: 4000,
+        pauseOnHover: true,
+        breakpoints: {
+          768: { perPage: 1 },
+        },
       });
-    });
+
+      slider.mount();
+
+      // Tab toggle
+      const tabs = document.querySelectorAll<HTMLElement>('.tab');
+      const slides = document.querySelectorAll<HTMLElement>('.splide__slide[data-category]:not(.splide__slide--clone)');
+
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          const cat = tab.dataset.category;
+          const targetIndex = Array.from(slides).findIndex(s => s.dataset.category === cat);
+          slider.go(targetIndex >= 0 ? targetIndex : 0);
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', initSlider);
   </script>
 
 </BaseLayout>
